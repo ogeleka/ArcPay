@@ -1,0 +1,68 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Environment variables ──────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.local
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+
+# ── Hardhat / Solidity ────────────────────────────────────────────────────────
+artifacts/
+cache/
+coverage/
+coverage.json
+typechain-types/
+
+# ── Database ──────────────────────────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pm2-error*.log
+pm2-out*.log
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Internal planning docs ────────────────────────────────────────────────────
+TRACKER.md
+TRACKER2.md
+TRACKER3.md
+PITCH.md
+FINAL*.md
+
+# ── Tool config ───────────────────────────────────────────────────────────────
+.claude/
+
+# ── Legacy HTML (superseded by React frontend) ────────────────────────────────
+backend/public/
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+.nyc_output/
+*.tgz
+*.tar.gz
