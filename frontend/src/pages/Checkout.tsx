@@ -186,6 +186,9 @@ export default function Checkout() {
           payment.payment_id as `0x${string}`,
           payment.merchant_address as `0x${string}`,
           BigInt(payment.amount),
+          payment.expires_at
+            ? BigInt(Math.floor(new Date(payment.expires_at).getTime() / 1000))
+            : 0n,
         ],
       });
       setTxHash(hash);
