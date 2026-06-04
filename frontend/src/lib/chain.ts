@@ -28,7 +28,7 @@ export const arcTestnet = defineChain({
 export const USDC_ADDRESS =
   "0x3600000000000000000000000000000000000000" as const;
 
-/** Deployed ArcPay contract address */
+/** Deployed ArcPay contract address — set VITE_ARCPAY_ADDRESS in your .env */
 export const ARCPAY_ADDRESS = (
-  import.meta.env.VITE_ARCPAY_ADDRESS ?? "0xA6fa26382E453b6BeE09BE730C0503c885Da51af"
+  import.meta.env.VITE_ARCPAY_ADDRESS ?? ""
 ) as `0x${string}`;
