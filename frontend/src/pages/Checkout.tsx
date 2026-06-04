@@ -370,9 +370,9 @@ export default function Checkout() {
               <>
                 {["creating", "approving", "paying"].includes(step) && (
                   <div className="rounded-xl bg-gray-50 p-3 space-y-2">
-                    <StepRow label="Register payment on-chain" state={stepState("creating")} />
-                    <StepRow label="Approve USDC"              state={stepState("approving")} />
-                    <StepRow label="Send payment"              state={stepState("paying")} />
+                    <StepRow label="Payment registered on-chain ✓" state="done" />
+                    <StepRow label="Approve USDC"                  state={stepState("approving")} />
+                    <StepRow label="Send payment"                  state={stepState("paying")} />
                   </div>
                 )}
 

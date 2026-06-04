@@ -1,8 +1,36 @@
-const express = require("express");
-const crypto  = require("crypto");
-const { db }  = require("../db");
+const express  = require("express");
+const crypto   = require("crypto");
+const { ethers } = require("ethers");
+const { db }   = require("../db");
 const { requireApiKey } = require("../middleware/auth");
 const { getRateForCurrency, getNgnRate, fiatToUsdc, usdcToFiat, CURRENCIES } = require("../fx");
+
+const ARCPAY_ABI = [
+  "function createPayment(bytes32 paymentId, address merchant, uint256 amount, uint64 deadline) external",
+];
+
+// Backend signer — owner of the deployed contract
+function getSigner() {
+  const rpc  = process.env.ARC_TESTNET_RPC;
+  const key  = process.env.PRIVATE_KEY;
+  const addr = process.env.ARCPAY_ADDRESS;
+  if (!rpc || !key || !addr) return null;
+  const network  = new ethers.Network("arc-testnet", 5042002);
+  const fetchReq = new ethers.FetchRequest(rpc);
+  fetchReq.timeout = 20_000;
+  const provider = new ethers.JsonRpcProvider(fetchReq, network, { staticNetwork: network });
+  const signer   = new ethers.Wallet(key, provider);
+  return { signer, contract: new ethers.Contract(addr, ARCPAY_ABI, signer) };
+}
+
+async function registerOnChain(paymentId, merchantWallet, amountUsdc, expiresAt) {
+  const ctx = getSigner();
+  if (!ctx) { console.warn("[chain] PRIVATE_KEY or ARCPAY_ADDRESS not set — skipping on-chain registration"); return; }
+  const deadline = expiresAt ? BigInt(Math.floor(new Date(expiresAt).getTime() / 1000)) : 0n;
+  const tx = await ctx.contract.createPayment(paymentId, merchantWallet, BigInt(amountUsdc), deadline);
+  await tx.wait();
+  console.log(`[chain] createPayment ${paymentId.slice(0, 10)}… tx=${tx.hash.slice(0, 10)}…`);
+}
 
 const EXPIRY_MS = 15 * 60 * 1000;
 const VALID_STATUSES = new Set(["pending", "paid", "expired", "refunded", "released", "all"]);
@@ -77,6 +105,9 @@ router.post("/", requireApiKey, async (req, res, next) => {
     const appUrl    = process.env.APP_URL || "http://localhost:3000";
     const expiresAt = new Date(Date.now() + EXPIRY_MS).toISOString();
 
+    // Fetch merchant wallet for on-chain registration
+    const merchantRow = db.prepare("SELECT wallet_address FROM merchants WHERE id = ?").get(req.merchantId);
+
     db.prepare(
       `INSERT INTO payments
          (id, merchant_id, amount, currency, amount_ngn, rate,
@@ -90,6 +121,10 @@ router.post("/", requireApiKey, async (req, res, next) => {
       order_id ?? null, customer_email ?? null, callback_url ?? null,
       metadata ? JSON.stringify(metadata) : null, expiresAt,
     );
+
+    // Register payment on-chain (non-blocking — respond to merchant immediately)
+    registerOnChain(paymentId, merchantRow.wallet_address, amountUsdc, expiresAt)
+      .catch(err => console.error("[chain] createPayment failed:", err.message));
 
     const response = {
       payment_id:  paymentId,
