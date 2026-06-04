@@ -219,12 +219,12 @@ export default function Landing() {
                   className="rounded-xl bg-[#c7c2f7] text-[#0a1734] font-semibold px-6 h-12 inline-flex items-center hover:bg-white transition-colors">
                   Start integrating →
                 </Link>
-                <Link to="/docs"
+                <Link to="/demo"
                   className="rounded-xl border border-white/30 text-white font-semibold px-6 h-12 inline-flex items-center hover:bg-white/10 transition-colors">
-                  View docs
+                  Try the demo ↗
                 </Link>
-                <Link to="/store" className="text-sm text-blue-100/70 hover:text-white underline underline-offset-4">
-                  See demo store
+                <Link to="/docs" className="text-sm text-blue-100/70 hover:text-white underline underline-offset-4">
+                  View docs
                 </Link>
               </div>
               {/* Live in */}
@@ -471,6 +471,44 @@ export default function Landing() {
               className="rounded-xl border border-white/30 text-white font-semibold px-6 h-12 inline-flex items-center hover:bg-white/10 transition-colors">
               See Footie demo store
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Try the demo ── */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <div className="rounded-3xl border border-gray-100 bg-white shadow-sm p-8 sm:p-12">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#ede9ff] px-3 py-1 text-xs font-semibold text-[#6c47ff] mb-5">
+                ⚡ Live on Arc testnet
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">See a real payment in under 3 minutes</h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                The Footie Lagos demo store runs the full ArcPay loop. Add Arc testnet to MetaMask, claim free test USDC, pick a shoe, and watch the payment settle on-chain — we walk you through every step.
+              </p>
+              <Link to="/demo">
+                <Button size="lg">Start the demo walkthrough →</Button>
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {[
+                { n: "1", label: "Add Arc testnet to MetaMask",       sub: "One click — we fill in the details" },
+                { n: "2", label: "Claim free test USDC from faucet",  sub: "Takes about 10 seconds to arrive"   },
+                { n: "3", label: "Buy a shoe on Footie Lagos",        sub: "Real checkout, real on-chain tx"    },
+                { n: "4", label: "Watch it settle in under 1 second", sub: "Sub-second finality on Arc"         },
+              ].map(({ n, label, sub }) => (
+                <div key={n} className="flex items-center gap-4 rounded-xl bg-gray-50 px-4 py-3">
+                  <div className="w-7 h-7 rounded-full bg-[#6c47ff] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                    {n}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{label}</p>
+                    <p className="text-xs text-gray-400">{sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

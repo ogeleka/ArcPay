@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Loader2, ExternalLink } from "lucide-react";
+import { ShoppingBag, Loader2, ExternalLink, Info, X } from "lucide-react";
 import { ArcPay } from "@/lib/sdk";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -124,8 +124,46 @@ export default function Store() {
   }
 
   // ── Store ───────────────────────────────────────────────────────────────────
+  const [guideDismissed, setGuideDismissed] = useState(
+    () => sessionStorage.getItem("footie_guide_dismissed") === "1"
+  );
+  function dismissGuide() {
+    sessionStorage.setItem("footie_guide_dismissed", "1");
+    setGuideDismissed(true);
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+      {/* Setup guide banner — shown once per session */}
+      {!guideDismissed && !justPaid && (
+        <div className="mb-6 rounded-2xl border border-[#6c47ff]/20 bg-[#ede9ff]/50 px-5 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex gap-3">
+              <Info className="w-4 h-4 text-[#6c47ff] mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-[#6c47ff] mb-1">First time here?</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  You'll need MetaMask connected to <strong>Arc Testnet</strong> with some test USDC to pay.
+                  Our step-by-step guide sets everything up in under 3 minutes.
+                </p>
+                <div className="flex items-center gap-3 mt-2.5">
+                  <Link to="/demo"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#6c47ff] text-white text-xs font-semibold px-3 py-1.5 hover:opacity-90">
+                    Open setup guide <ExternalLink className="w-3 h-3" />
+                  </Link>
+                  <button onClick={dismissGuide} className="text-xs text-gray-400 hover:text-gray-600 underline">
+                    I'm already set up
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button onClick={dismissGuide} className="text-gray-300 hover:text-gray-500 shrink-0">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="text-center mb-10">
