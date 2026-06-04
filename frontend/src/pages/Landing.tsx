@@ -467,10 +467,11 @@ export default function Landing() {
               className="rounded-xl bg-[#c7c2f7] text-[#0a1734] font-semibold px-6 h-12 inline-flex items-center hover:bg-white transition-colors">
               Start accepting USDC
             </Link>
-            <Link to="/store"
+            <a href={import.meta.env.VITE_STORE_URL ?? "http://localhost:3100"}
+              target="_blank" rel="noreferrer"
               className="rounded-xl border border-white/30 text-white font-semibold px-6 h-12 inline-flex items-center hover:bg-white/10 transition-colors">
-              See Footie demo store
-            </Link>
+              See Footie Lagos demo ↗
+            </a>
           </div>
         </div>
       </section>
@@ -523,7 +524,7 @@ export default function Landing() {
             </div>
             <nav className="flex flex-wrap items-center gap-6 text-sm text-gray-400">
               <Link to="/docs"      className="hover:text-gray-900 transition-colors">Docs</Link>
-              <Link to="/store"     className="hover:text-gray-900 transition-colors">Demo store</Link>
+              <a href={import.meta.env.VITE_STORE_URL ?? "http://localhost:3100"} target="_blank" rel="noreferrer" className="hover:text-gray-900 transition-colors">Demo store ↗</a>
               <Link to="/dashboard" className="hover:text-gray-900 transition-colors">Dashboard</Link>
               <a href="https://arc.network" target="_blank" rel="noreferrer"
                 className="hover:text-gray-900 transition-colors">Arc ↗</a>

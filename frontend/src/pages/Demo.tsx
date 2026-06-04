@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Check, ChevronDown, ChevronUp, ExternalLink, Copy, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const STORE_URL = import.meta.env.VITE_STORE_URL ?? "http://localhost:3100";
+
 // ─── Arc testnet params (for MetaMask add-chain) ─────────────────────────────
 const ARC_TESTNET = {
   chainId:         "0x4CE892",        // 5042002 in hex
@@ -214,34 +216,37 @@ export default function Demo() {
           </div>
         </Step>
 
-        {/* Step 4 — Try the store */}
-        <Step n={4} title="Open the Footie Lagos store and buy a shoe" subtitle="Pick a shoe, pay with USDC — watch it settle in under a second">
+        {/* Step 4 — Try the real Footie store */}
+        <Step n={4} title="Open Footie Lagos and buy a shoe" subtitle="Pick a shoe, pay with USDC — watch it settle in under a second">
           <p className="text-sm text-gray-500">
-            You're ready. Click a product, approve the USDC spend in MetaMask, and pay. The whole
-            flow settles on-chain in under a second.
+            You're ready. Click a shoe, log in (or register quickly), go to checkout,
+            and click "Pay with ArcPay". Approve in MetaMask and the payment settles on-chain in under a second.
           </p>
           <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-xs text-gray-500 space-y-1.5">
             <p className="font-semibold text-gray-700 text-sm">What happens when you pay:</p>
             <div className="space-y-1">
               {[
-                ["Register",   "ArcPay registers the payment on-chain"],
-                ["Approve",    "You allow the contract to spend your USDC"],
-                ["Pay",        "USDC splits instantly — merchant gets 99.5%, 0.5% fee"],
-                ["Webhook",    "ArcPay notifies the store — order confirmed"],
-                ["Done",       "You land back on the store with a ✅ confirmation"],
+                ["Registered", "ArcPay backend pre-registers the payment on-chain"],
+                ["Approve",    "You allow the ArcPay contract to spend your USDC"],
+                ["Pay",        "USDC splits instantly — merchant gets 99.5%, 0.5% protocol fee"],
+                ["Webhook",    "ArcPay fires a signed webhook — Footie confirms the order"],
+                ["Done ✅",    "You land back on Footie Lagos with your order confirmed"],
               ].map(([label, desc]) => (
                 <div key={label} className="flex gap-2">
-                  <span className="font-semibold text-[#6c47ff] w-16 shrink-0">{label}</span>
+                  <span className="font-semibold text-[#6c47ff] w-24 shrink-0">{label}</span>
                   <span>{desc}</span>
                 </div>
               ))}
             </div>
           </div>
-          <Link to="/store">
+          <a href={STORE_URL} target="_blank" rel="noreferrer" className="block">
             <Button className="w-full" size="lg">
-              Go to Footie Lagos store →
+              Open Footie Lagos store <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
-          </Link>
+          </a>
+          <p className="text-xs text-gray-400 text-center">
+            Opens in a new tab · running at {STORE_URL}
+          </p>
         </Step>
 
       </div>
