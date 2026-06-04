@@ -33,6 +33,9 @@ router.post("/", requireApiKey, async (req, res, next) => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       return res.status(400).json({ error: "amount required and must be > 0" });
     }
+    if (metadata && JSON.stringify(metadata).length > 2048) {
+      return res.status(400).json({ error: "metadata must be 2 KB or less" });
+    }
 
     // Fetch merchant for markup_bps
     const merchant = db.prepare(

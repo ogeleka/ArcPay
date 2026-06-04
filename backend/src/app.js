@@ -98,8 +98,9 @@ app.use("/merchants", require("./routes/merchants"));
 app.use("/payments", require("./routes/payments"));
 
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
+  console.error(`[error] ${req.method} ${req.path} — ${err.message}`);
+  if (process.env.NODE_ENV !== "production") console.error(err.stack);
+  res.status(err.status ?? 500).json({ error: "Internal server error" });
 });
 
 module.exports = app;
