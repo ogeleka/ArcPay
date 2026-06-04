@@ -11,8 +11,9 @@ describe("ArcPay", function () {
   const PAYMENT_ID     = ethers.keccak256(ethers.toUtf8Bytes("order-001"));
   const NO_DEADLINE    = 0n;
 
-  function deadline(secondsFromNow) {
-    return BigInt(Math.floor(Date.now() / 1000) + secondsFromNow);
+  async function deadline(secondsFromNow) {
+    const now = await time.latest();
+    return BigInt(now + secondsFromNow);
   }
 
   beforeEach(async function () {
@@ -46,7 +47,7 @@ describe("ArcPay", function () {
   it("reverts deploy with zero addresses", async function () {
     const ArcPay = await ethers.getContractFactory("ArcPay");
     await expect(ArcPay.deploy(ethers.ZeroAddress, feeRecipient.address, FEE_BPS))
-      .to.be.revertedWith("Invalid USDC");
+      .to.be.revertedWith("USDC not a contract");
     await expect(ArcPay.deploy(await usdc.getAddress(), ethers.ZeroAddress, FEE_BPS))
       .to.be.revertedWith("Invalid feeRecipient");
   });
@@ -144,7 +145,7 @@ describe("ArcPay", function () {
   });
 
   it("pay reverts after deadline", async function () {
-    const dl = deadline(60); // 60 seconds from now
+    const dl = await deadline(60);
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT, dl);
     await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
 
@@ -155,7 +156,7 @@ describe("ArcPay", function () {
   });
 
   it("pay succeeds before deadline", async function () {
-    const dl = deadline(900);
+    const dl = await deadline(900);
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT, dl);
     await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
     await expect(arcPay.connect(payer).pay(PAYMENT_ID)).to.not.be.reverted;
@@ -204,6 +205,23 @@ describe("ArcPay", function () {
 
     await expect(arcPay.connect(other).refund(PAYMENT_ID))
       .to.be.revertedWith("Not merchant");
+  });
+
+  it("pay uses fee rate locked at creation, not current feeBps", async function () {
+    // Create at 0.5%, then raise fee — existing invoice must still use 0.5%
+    await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT, NO_DEADLINE);
+    await arcPay.setFeeBps(500n); // raise to 5% AFTER creation
+    await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
+
+    const feeAtCreation = (PAYMENT_AMOUNT * FEE_BPS) / 10000n; // 0.5%
+    const netAtCreation = PAYMENT_AMOUNT - feeAtCreation;
+
+    await expect(arcPay.connect(payer).pay(PAYMENT_ID))
+      .to.changeTokenBalances(
+        usdc,
+        [payer, merchant, feeRecipient],
+        [-PAYMENT_AMOUNT, netAtCreation, feeAtCreation]
+      );
   });
 
   // ── Admin ───────────────────────────────────────────────────────────────────

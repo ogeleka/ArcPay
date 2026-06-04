@@ -21,9 +21,10 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
     struct Payment {
         address payer;
         address merchant;
-        uint256 amount;    // gross USDC base units (6 dp)
-        uint256 netPaid;   // what the merchant received
-        uint64  deadline;  // unix timestamp; 0 = no expiry
+        uint256 amount;          // gross USDC base units (6 dp)
+        uint256 netPaid;         // what the merchant received (set on pay)
+        uint256 feeBpsSnapshot;  // fee rate locked at creation — immune to later setFeeBps
+        uint64  deadline;        // unix timestamp; 0 = no expiry
         Status  status;
     }
 
@@ -37,7 +38,7 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
     constructor(address _usdc, address _feeRecipient, uint256 _feeBps)
         Ownable(msg.sender)
     {
-        require(_usdc != address(0),          "Invalid USDC");
+        require(_usdc.code.length > 0,        "USDC not a contract"); // item 4
         require(_feeRecipient != address(0),  "Invalid feeRecipient");
         require(_feeBps <= MAX_FEE_BPS,       "Fee too high");
         usdc         = IERC20(_usdc);
@@ -45,7 +46,9 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
         feeBps       = _feeBps;
     }
 
-    // Only the backend (owner) can register payments — closes front-run theft vector
+    // Only the backend (owner) can register payments — closes front-run theft vector.
+    // paymentId is generated off-chain by the backend, e.g.
+    //   keccak256(abi.encode(merchant, amount, orderId/nonce))  — must be unique.
     function createPayment(
         bytes32 paymentId,
         address merchant,
@@ -55,20 +58,22 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
         require(payments[paymentId].merchant == address(0), "Payment exists");
         require(merchant != address(0), "Invalid merchant");
         require(amount > 0, "Amount must be > 0");
+        require(deadline == 0 || deadline > block.timestamp, "Deadline in past"); // item 2
 
         payments[paymentId] = Payment({
-            payer:    address(0),
-            merchant: merchant,
-            amount:   amount,
-            netPaid:  0,
-            deadline: deadline,
-            status:   Status.Pending
+            payer:          address(0),
+            merchant:       merchant,
+            amount:         amount,
+            netPaid:        0,
+            feeBpsSnapshot: feeBps, // item 1 — lock the fee for this invoice
+            deadline:       deadline,
+            status:         Status.Pending
         });
 
         emit PaymentCreated(paymentId, merchant, amount);
     }
 
-    // Atomic settle — net goes straight to merchant, fee to protocol, no escrow
+    // Atomic settle — net goes straight to merchant, fee to protocol, no escrow.
     function pay(bytes32 paymentId) external nonReentrant whenNotPaused {
         Payment storage p = payments[paymentId];
         require(p.merchant != address(0), "Payment not found");
@@ -76,10 +81,10 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
         require(p.deadline == 0 || block.timestamp <= p.deadline, "Payment expired");
 
         uint256 amount    = p.amount;
-        uint256 fee       = (amount * feeBps) / 10000;
+        uint256 fee       = (amount * p.feeBpsSnapshot) / 10000; // item 1 — use snapshot
         uint256 netAmount = amount - fee;
 
-        // effects before interactions
+        // effects before interactions (CEI)
         p.payer   = msg.sender;
         p.netPaid = netAmount;
         p.status  = Status.Settled;
@@ -91,14 +96,15 @@ contract ArcPay is Ownable, ReentrancyGuard, Pausable {
         emit PaymentPaid(paymentId, msg.sender, netAmount, fee);
     }
 
-    // Real refund — merchant approves contract first, then contract pulls netPaid back to payer
+    // Real refund — merchant approves the contract first, then it pulls netPaid back
+    // to the payer. Status set BEFORE the transfer (CEI) to block reentrancy.
     function refund(bytes32 paymentId) external nonReentrant {
         Payment storage p = payments[paymentId];
         require(p.status == Status.Settled, "Not settled");
         require(msg.sender == p.merchant,   "Not merchant");
 
         uint256 net = p.netPaid;
-        p.status = Status.Refunded;
+        p.status = Status.Refunded; // effect before interaction — keep this order
 
         usdc.safeTransferFrom(msg.sender, p.payer, net);
         emit PaymentRefunded(paymentId, p.payer, net);
