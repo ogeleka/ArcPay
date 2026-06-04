@@ -6,7 +6,18 @@ const { db }   = require("../db");
 
 const router     = express.Router();
 const SALT_ROUNDS = 12;
-const JWT_EXPIRY  = "7d";
+const JWT_EXPIRY  = "24h";
+
+function isSafeWebhookUrl(raw) {
+  if (!raw) return true;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname;
+    if (/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$)/.test(h)) return false;
+    return true;
+  } catch { return false; }
+}
 
 function signToken(merchantId) {
   return jwt.sign({ merchantId }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
@@ -22,11 +33,21 @@ router.post("/register", async (req, res, next) => {
       business_type, website, use_case, default_currency, markup_bps,
     } = req.body;
 
-    if (!name?.trim())           return res.status(400).json({ error: "Name is required" });
-    if (!email?.trim())          return res.status(400).json({ error: "Email is required" });
-    if (!wallet_address?.trim()) return res.status(400).json({ error: "Wallet address is required" });
+    if (!name?.trim())                    return res.status(400).json({ error: "Name is required" });
+    if (name.trim().length > 100)         return res.status(400).json({ error: "Name must be 100 characters or fewer" });
+    if (!email?.trim())                   return res.status(400).json({ error: "Email is required" });
+    if (email.trim().length > 254)        return res.status(400).json({ error: "Email too long" });
+    if (!wallet_address?.trim())          return res.status(400).json({ error: "Wallet address is required" });
+    if (!/^0x[0-9a-fA-F]{40}$/.test(wallet_address.trim()))
+      return res.status(400).json({ error: "Invalid wallet address" });
     if (!password || password.length < 8)
       return res.status(400).json({ error: "Password must be at least 8 characters" });
+    if (password.length > 128)
+      return res.status(400).json({ error: "Password must be 128 characters or fewer" });
+    if (webhook_url && !isSafeWebhookUrl(webhook_url))
+      return res.status(400).json({ error: "webhook_url must be an HTTPS URL pointing to a public host" });
+    if (website && website.length > 500)
+      return res.status(400).json({ error: "Website URL too long" });
 
     // Optional business profile — validate currency + markup if provided
     const currency = (default_currency || "NGN").toUpperCase();

@@ -6,36 +6,23 @@ const { requireApiKey } = require("../middleware/auth");
 
 const USDC_ABI = ["function balanceOf(address) view returns (uint256)"];
 
+// Blocks SSRF — only allow HTTPS to public hosts
+function isSafeWebhookUrl(raw) {
+  if (!raw) return true; // optional field
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname;
+    if (/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$)/.test(h)) return false;
+    return true;
+  } catch { return false; }
+}
+
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  const { name, email, wallet_address, webhook_url } = req.body;
-  if (!name || !email) return res.status(400).json({ error: "name and email are required" });
-  if (!wallet_address) return res.status(400).json({ error: "wallet_address is required" });
-
-  try {
-    const merchantId = crypto.randomUUID();
-    db.prepare(
-      "INSERT INTO merchants (id, name, email, wallet_address, webhook_url) VALUES (?, ?, ?, ?, ?)"
-    ).run(merchantId, name, email, wallet_address, webhook_url ?? null);
-
-    const apiKey = crypto.randomBytes(32).toString("hex");
-    const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
-    db.prepare(
-      "INSERT INTO api_keys (id, merchant_id, key_hash) VALUES (?, ?, ?)"
-    ).run(crypto.randomUUID(), merchantId, keyHash);
-
-    const webhookSecret = crypto.randomBytes(24).toString("hex");
-    db.prepare("UPDATE merchants SET webhook_secret = ? WHERE id = ?")
-      .run(webhookSecret, merchantId);
-
-    res.status(201).json({ merchant_id: merchantId, api_key: apiKey, webhook_secret: webhookSecret });
-  } catch (err) {
-    if (err.message.includes("UNIQUE constraint failed: merchants.email")) {
-      return res.status(409).json({ error: "Email already registered" });
-    }
-    throw err;
-  }
+// POST /merchants — legacy open endpoint removed (use POST /auth/register instead)
+router.post("/", (_req, res) => {
+  res.status(410).json({ error: "This endpoint is gone. Use POST /auth/register to create an account." });
 });
 
 // GET /merchants/me — profile + live on-chain USDC balance
@@ -148,6 +135,8 @@ router.patch("/me", requireApiKey, (req, res, next) => {
         .run(wallet_address.trim(), req.merchantId);
     }
     if (webhook_url !== undefined) {
+      if (webhook_url && !isSafeWebhookUrl(webhook_url))
+        return res.status(400).json({ error: "webhook_url must be an HTTPS URL pointing to a public host" });
       db.prepare("UPDATE merchants SET webhook_url = ? WHERE id = ?")
         .run(webhook_url || null, req.merchantId);
     }

@@ -38,22 +38,31 @@ describe("ArcPay", function () {
       .to.be.revertedWith("Payment exists");
   });
 
-  it("pay transfers USDC to contract", async function () {
+  it("pay settles atomically — net to merchant, fee to feeRecipient", async function () {
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
     await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
 
+    const fee       = (PAYMENT_AMOUNT * FEE_BPS) / 10000n;
+    const netAmount = PAYMENT_AMOUNT - fee;
+
     await expect(arcPay.connect(payer).pay(PAYMENT_ID))
-      .to.changeTokenBalances(usdc, [payer, arcPay], [-PAYMENT_AMOUNT, PAYMENT_AMOUNT]);
+      .to.changeTokenBalances(
+        usdc,
+        [payer, merchant, feeRecipient],
+        [-PAYMENT_AMOUNT, netAmount, fee]
+      );
   });
 
-  it("pay emits PaymentPaid with correct fee", async function () {
+  it("pay emits PaymentPaid with net amount and fee", async function () {
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
     await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
 
-    const expectedFee = (PAYMENT_AMOUNT * FEE_BPS) / 10000n;
+    const fee       = (PAYMENT_AMOUNT * FEE_BPS) / 10000n;
+    const netAmount = PAYMENT_AMOUNT - fee;
+
     await expect(arcPay.connect(payer).pay(PAYMENT_ID))
       .to.emit(arcPay, "PaymentPaid")
-      .withArgs(PAYMENT_ID, payer.address, PAYMENT_AMOUNT, expectedFee);
+      .withArgs(PAYMENT_ID, payer.address, netAmount, fee);
   });
 
   it("pay reverts on unknown payment", async function () {
@@ -62,37 +71,30 @@ describe("ArcPay", function () {
       .to.be.revertedWith("Payment not found");
   });
 
-  it("release sends net to merchant and fee to feeRecipient", async function () {
+  it("pay reverts on double payment", async function () {
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
-    await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
+    await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT * 2n);
     await arcPay.connect(payer).pay(PAYMENT_ID);
-
-    const fee = (PAYMENT_AMOUNT * FEE_BPS) / 10000n;
-    const netAmount = PAYMENT_AMOUNT - fee;
-
-    await expect(arcPay.connect(merchant).release(PAYMENT_ID))
-      .to.changeTokenBalances(
-        usdc,
-        [arcPay, merchant, feeRecipient],
-        [-PAYMENT_AMOUNT, netAmount, fee]
-      );
+    await expect(arcPay.connect(payer).pay(PAYMENT_ID))
+      .to.be.revertedWith("Payment not pending");
   });
 
-  it("release reverts if caller is not merchant", async function () {
+  it("markRefunded sets status and emits event", async function () {
     await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
     await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
     await arcPay.connect(payer).pay(PAYMENT_ID);
 
-    await expect(arcPay.connect(other).release(PAYMENT_ID))
+    await expect(arcPay.connect(merchant).markRefunded(PAYMENT_ID))
+      .to.emit(arcPay, "PaymentRefunded")
+      .withArgs(PAYMENT_ID, payer.address, PAYMENT_AMOUNT);
+  });
+
+  it("markRefunded reverts if caller is not merchant", async function () {
+    await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
+    await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
+    await arcPay.connect(payer).pay(PAYMENT_ID);
+
+    await expect(arcPay.connect(other).markRefunded(PAYMENT_ID))
       .to.be.revertedWith("Not merchant");
-  });
-
-  it("refund returns full amount to payer", async function () {
-    await arcPay.createPayment(PAYMENT_ID, merchant.address, PAYMENT_AMOUNT);
-    await usdc.connect(payer).approve(await arcPay.getAddress(), PAYMENT_AMOUNT);
-    await arcPay.connect(payer).pay(PAYMENT_ID);
-
-    await expect(arcPay.connect(merchant).refund(PAYMENT_ID))
-      .to.changeTokenBalances(usdc, [arcPay, payer], [-PAYMENT_AMOUNT, PAYMENT_AMOUNT]);
   });
 });

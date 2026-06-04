@@ -1,20 +1,40 @@
-const express = require("express");
-const cors    = require("cors");
-const path = require("path");
-const { db } = require("./db");
+const express   = require("express");
+const cors      = require("cors");
+const helmet    = require("helmet");
+const rateLimit = require("express-rate-limit");
+const path      = require("path");
+const { db }    = require("./db");
 const { getRateForCurrency, CURRENCIES } = require("./fx");
 
 const app = express();
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:3003",
-    ...(process.env.APP_URL ? [process.env.APP_URL] : []),
-    ...(process.env.STORE_URL ? [process.env.STORE_URL] : []),
-  ],
-  credentials: true,
-}));
-app.use(express.json());
+
+// Security headers
+app.use(helmet({ contentSecurityPolicy: false })); // CSP disabled — checkout page loads external scripts
+
+// CORS — explicit allowlist only
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3003",
+  ...(process.env.APP_URL  ? [process.env.APP_URL]  : []),
+  ...(process.env.STORE_URL ? [process.env.STORE_URL] : []),
+].filter(Boolean);
+
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+
+// Rate limiting
+const limiter = (max, windowMin) => rateLimit({
+  windowMs: windowMin * 60 * 1000,
+  max,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests — please slow down." },
+});
+
+app.use("/auth/login",    limiter(10, 15));  // 10 attempts per 15 min
+app.use("/auth/register", limiter(5,  60));  // 5 registrations per hour
+app.use("/payments",      limiter(120, 1));  // 120 creates/reads per min per IP
+
+app.use(express.json({ limit: "64kb" })); // reject oversized payloads
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Public: payment details the checkout page needs (no API key required)
