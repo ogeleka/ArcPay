@@ -6,7 +6,7 @@ import {
 import { Copy, Check, RefreshCw, ExternalLink, Loader2, AlertCircle, Webhook, Key, Plus, Eye, EyeOff, ShieldCheck,
   ShoppingBag, Repeat, User, Heart, Sparkles, ArrowLeft, ArrowRight, Wallet,
   LayoutDashboard, Receipt, Settings as SettingsIcon, FileText, LifeBuoy,
-  Search, Download, Link2, CreditCard, Code2, LogOut, ChevronUp, ChevronDown } from "lucide-react";
+  Search, Download, Link2, CreditCard, Code2, LogOut, ChevronUp, ChevronDown, X } from "lucide-react";
 
 import {
   getMe, listPayments, createPayment, testWebhook, rotateKey, updateWebhookUrl,
@@ -599,11 +599,22 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
   useEffect(() => {
     refresh();
-    // Try to get NGN rate from the FX micro-service
-    fetch("http://localhost:3002/rate")
-      .then(r => r.json())
-      .then(d => setNgnRate(d.usdToNgn))
-      .catch(() => {});
+    // Fetch live NGN rate — try backend /api/rates first (always running),
+    // fall back to the NGN micro-service
+    const loadRate = () =>
+      fetch("/api/rates")
+        .then(r => r.json())
+        .then(d => {
+          const ngn = d.rates?.NGN?.rate ?? null;
+          if (ngn) setNgnRate(ngn);
+        })
+        .catch(() =>
+          fetch("http://localhost:3002/rate")
+            .then(r => r.json())
+            .then(d => { if (d.usdToNgn) setNgnRate(d.usdToNgn); })
+            .catch(() => {})
+        );
+    loadRate();
     // Live poll every 10 s
     pollRef.current = setInterval(refresh, 10_000);
     return () => clearInterval(pollRef.current);
@@ -731,6 +742,16 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const hasPayment = merchant.total_payments > 0;
   const hasMarkup  = (merchant.markup_bps ?? 0) > 0;
   const coreDone   = hasWallet && hasWebhook && hasPayment;
+
+  // "All set" banner — dismiss permanently per merchant
+  const bannerKey = `arcpay_setup_done_${merchant.id}`;
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => localStorage.getItem(bannerKey) === "1"
+  );
+  function dismissBanner() {
+    localStorage.setItem(bannerKey, "1");
+    setBannerDismissed(true);
+  }
 
   // ── Chart data ─────────────────────────────────────────────────────────────
   const payments  = paymentList.data;
@@ -961,17 +982,22 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     ))}
                   </CardBody>
                 </Card>
-              ) : (
+              ) : !bannerDismissed ? (
                 <div className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 flex items-center gap-2">
                   <Check className="w-5 h-5 text-green-600 shrink-0" />
                   <p className="text-sm font-medium text-green-800">You're all set up and ready to go! 🎉</p>
-                  {!hasMarkup && (
-                    <button onClick={() => setActiveView("settings")} className="ml-auto text-xs text-green-700 font-semibold hover:underline">
-                      Set FX markup →
+                  <div className="ml-auto flex items-center gap-3">
+                    {!hasMarkup && (
+                      <button onClick={() => openSetting("currency")} className="text-xs text-green-700 font-semibold hover:underline">
+                        Set FX markup →
+                      </button>
+                    )}
+                    <button onClick={dismissBanner} className="text-green-600 hover:text-green-800" title="Dismiss">
+                      <X className="w-4 h-4" />
                     </button>
-                  )}
+                  </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Stats */}
               {loadingData ? <StatsSkeleton /> : (
