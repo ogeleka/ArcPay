@@ -890,18 +890,25 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
           </div>
           <p className="hidden lg:block text-sm font-semibold capitalize">{activeView === "home" ? "Dashboard" : activeView}</p>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex flex-col items-end leading-tight">
-              <span className="text-[10px] uppercase tracking-wide text-gray-400">USDC Balance</span>
-              <span className="text-sm font-bold">{balanceStr}</span>
-            </div>
-            <select value={merchant.default_currency} onChange={e => saveCurrency(e.target.value)}
-              className="hidden sm:block text-xs border border-gray-200 rounded-lg px-2 py-1.5 outline-none cursor-pointer">
-              {["NGN", "GHS", "ZAR", "KES", "USD", "USDC"].map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <button onClick={() => refresh()} className="text-gray-400 hover:text-gray-600" title="Refresh"><RefreshCw className="w-4 h-4" /></button>
-            <Button size="sm" onClick={() => setShowModal(true)}>+ New</Button>
-            <button onClick={onLogout} className="text-gray-400 hover:text-gray-600" title="Sign out"><LogOut className="w-4 h-4" /></button>
+          <div className="flex items-center gap-3">
+            {/* Currency flag — click to go to currency settings */}
+            <button
+              onClick={() => openSetting("currency")}
+              title={`Currency: ${merchant.default_currency}`}
+              className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition-colors">
+              <span className="text-base leading-none">
+                {{"NGN":"🇳🇬","GHS":"🇬🇭","KES":"🇰🇪","ZAR":"🇿🇦","USD":"🇺🇸","USDC":"💵"}[merchant.default_currency] ?? "💱"}
+              </span>
+              <span className="font-semibold">{merchant.default_currency}</span>
+            </button>
+            <button onClick={() => refresh()} className="text-gray-400 hover:text-gray-600 transition-colors" title="Refresh">
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-red-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:border-red-200 hover:bg-red-50 transition-colors">
+              <LogOut className="w-3.5 h-3.5" /> Sign out
+            </button>
           </div>
         </header>
 
@@ -973,7 +980,11 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     <Card key={label} className="p-5">
                       <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">{label}</p>
                       <p className="text-2xl font-bold text-gray-900 truncate">{value}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 truncate">{sub}</p>
+                      {sub && (
+                        <p className={`text-xs mt-0.5 truncate ${
+                          sub.startsWith("≈") ? "text-gray-500 font-medium" : "text-gray-400"
+                        }`}>{sub}</p>
+                      )}
                     </Card>
                   ))}
                 </div>
