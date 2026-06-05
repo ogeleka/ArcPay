@@ -614,7 +614,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [statusFilter, setStatusFilter] = useState("all");
   const [page,        setPage]        = useState(1);
   const [showModal,   setShowModal]   = useState(false);
-  const [ngnRate,     setNgnRate]     = useState<number | null>(null);
+  const [rates,       setRates]       = useState<Record<string, number>>({});
   const [loadingData, setLoadingData] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
@@ -693,22 +693,18 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
   useEffect(() => {
     refresh();
-    // Fetch live NGN rate — try backend /api/rates first (always running),
-    // fall back to the NGN micro-service
-    const loadRate = () =>
-      fetch("/api/rates")
-        .then(r => r.json())
-        .then(d => {
-          const ngn = d.rates?.NGN?.rate ?? null;
-          if (ngn) setNgnRate(ngn);
-        })
-        .catch(() =>
-          fetch("http://localhost:3002/rate")
-            .then(r => r.json())
-            .then(d => { if (d.usdToNgn) setNgnRate(d.usdToNgn); })
-            .catch(() => {})
-        );
-    loadRate();
+    // Fetch live FX rates for all supported currencies
+    fetch("/api/rates")
+      .then(r => r.json())
+      .then(d => {
+        const map: Record<string, number> = {};
+        for (const [code, v] of Object.entries(d.rates ?? {})) {
+          const rate = (v as { rate?: number }).rate;
+          if (rate) map[code] = rate;
+        }
+        setRates(map);
+      })
+      .catch(() => {});
     // Live poll every 10 s
     pollRef.current = setInterval(refresh, 10_000);
     return () => clearInterval(pollRef.current);
@@ -880,7 +876,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const TOOLS: Tool[] = (() => {
     const link     = { icon: Link2,      title: "Payment links",  desc: "Create a shareable pay link", onClick: () => setShowModal(true) };
     const checkout = { icon: CreditCard, title: "Hosted checkout", desc: "ArcPay-hosted pay page",      onClick: () => setShowModal(true) };
-    const hooks    = { icon: Webhook,    title: "Webhooks",        desc: "Get notified on payment",     onClick: () => setActiveView("settings") };
+    const hooks    = { icon: Webhook,    title: "Webhooks",        desc: "Get notified on payment",     onClick: () => openSetting("webhook") };
     const docs     = { icon: Code2,      title: "API & SDK",       desc: "Integrate in minutes",        onClick: () => window.open("/docs", "_blank") };
     const invoices = { icon: FileText,   title: "Invoices",        desc: "Coming soon",                 soon: true };
     switch (merchant.business_type) {
@@ -892,30 +888,37 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     }
   })();
 
+  // Local-currency equivalent — follows the merchant's chosen currency
+  const CURRENCY_SYM: Record<string, string> = { NGN: "₦", GHS: "₵", KES: "KSh", ZAR: "R", USD: "$", USDC: "" };
+  const localCur  = merchant.default_currency || "NGN";
+  const localRate = localCur === "USDC" ? null : (rates[localCur] ?? null);
+  const localSym  = CURRENCY_SYM[localCur] ?? "";
+  const fmtLocal  = (usdc: number) => `≈ ${localSym}${Math.round(usdc * (localRate ?? 0)).toLocaleString()}`;
+
   const statsCards = [
     {
       label: "USDC Balance",
       value: merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "—",
-      sub: merchant.usdc_balance && ngnRate
-        ? "≈ " + fmtNgn(Math.round(parseFloat(merchant.usdc_balance) * ngnRate))
+      sub: merchant.usdc_balance && localRate
+        ? fmtLocal(parseFloat(merchant.usdc_balance))
         : "wallet on Arc",
     },
     {
       label: "Today's Volume",
       value: `${todayVol.toFixed(2)} USDC`,
-      sub: ngnRate ? "≈ " + fmtNgn(Math.round(todayVol * ngnRate)) : "",
+      sub: localRate ? fmtLocal(todayVol) : "",
     },
     { label: "Total Payments", value: String(merchant.total_payments), sub: "all time" },
     {
       label: "Total Volume",
       value: `${parseFloat(merchant.total_volume_usdc).toFixed(2)} USDC`,
-      sub: ngnRate ? "≈ " + fmtNgn(Math.round(parseFloat(merchant.total_volume_usdc) * ngnRate)) : "paid + released",
+      sub: localRate ? fmtLocal(parseFloat(merchant.total_volume_usdc)) : "paid + released",
     },
   ];
 
   const checklist = [
     { done: hasWallet,  title: "Add your wallet address", desc: "Where your USDC settles",            cta: null as null | (() => void) },
-    { done: hasWebhook, title: "Set your webhook URL",    desc: "Where ArcPay notifies your app",     cta: () => setActiveView("settings") },
+    { done: hasWebhook, title: "Set your webhook URL",    desc: "Where ArcPay notifies your app",     cta: () => openSetting("webhook") },
     { done: hasPayment, title: "Make your first payment", desc: "Create a link and complete a pay",   cta: () => setShowModal(true) },
   ];
 
@@ -1505,14 +1508,17 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                         className="w-full accent-[#6c47ff]" />
                       <div className="flex justify-between text-[10px] text-gray-300 mt-1"><span>0%</span><span>5% max</span></div>
                     </div>
-                    {ngnRate && markupBps > 0 && (
-                      <div className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2.5 text-xs space-y-1.5">
-                        <p className="font-semibold text-gray-600">Live preview — ₦4,500 item</p>
-                        <p className="text-gray-500">No markup: <span className="font-mono">{(4500 / ngnRate).toFixed(2)} USDC</span></p>
-                        <p className="text-[#6c47ff] font-medium">With {(markupBps/100).toFixed(1)}%: <span className="font-mono">{(4500 * (1 + markupBps/10000) / ngnRate).toFixed(2)} USDC</span></p>
-                        <p className="text-gray-400">Buffer goes to your wallet on off-ramp.</p>
-                      </div>
-                    )}
+                    {localRate && markupBps > 0 && (() => {
+                      const sample = ({ NGN: 4500, GHS: 50, KES: 500, ZAR: 80, USD: 5 } as Record<string, number>)[localCur] ?? 4500;
+                      return (
+                        <div className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2.5 text-xs space-y-1.5">
+                          <p className="font-semibold text-gray-600">Live preview — {localSym}{sample.toLocaleString()} item</p>
+                          <p className="text-gray-500">No markup: <span className="font-mono">{(sample / localRate).toFixed(2)} USDC</span></p>
+                          <p className="text-[#6c47ff] font-medium">With {(markupBps/100).toFixed(1)}%: <span className="font-mono">{(sample * (1 + markupBps/10000) / localRate).toFixed(2)} USDC</span></p>
+                          <p className="text-gray-400">Buffer goes to your wallet on off-ramp.</p>
+                        </div>
+                      );
+                    })()}
                     {markupMsg && <p className={`text-xs ${markupMsg.includes("fail") ? "text-red-600" : "text-green-700"}`}>{markupMsg}</p>}
                     <Button className="w-full" onClick={saveMarkup} disabled={markupSaving}>
                       {markupSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save markup"}
