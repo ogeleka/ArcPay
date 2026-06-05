@@ -2,11 +2,20 @@ const express  = require("express");
 const crypto   = require("crypto");
 const bcrypt   = require("bcrypt");
 const jwt      = require("jsonwebtoken");
+const { ethers } = require("ethers");
 const { db }   = require("../db");
 
 const router     = express.Router();
 const SALT_ROUNDS = 12;
 const JWT_EXPIRY  = "24h";
+
+// In-memory nonce store for wallet sign-in: address(lowercase) → { nonce, expires }
+const walletNonces = new Map();
+const NONCE_TTL_MS = 5 * 60 * 1000;
+
+function buildSignMessage(address, nonce) {
+  return `Sign in to ArcPay\n\nWallet: ${address}\nNonce: ${nonce}`;
+}
 
 function isSafeWebhookUrl(raw) {
   if (!raw) return true;
@@ -118,6 +127,63 @@ router.post("/login", async (req, res, next) => {
 
     if (!merchant || !match)
       return res.status(401).json({ error: "Incorrect email or password" });
+
+    res.json({ token: signToken(merchant.id) });
+  } catch (err) { next(err); }
+});
+
+// ── POST /auth/wallet/nonce ─────────────────────────────────────────────────
+// Step 1 of wallet sign-in: client requests a nonce to sign.
+router.post("/wallet/nonce", (req, res) => {
+  const { address } = req.body;
+  if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address))
+    return res.status(400).json({ error: "Valid wallet address required" });
+
+  const addr  = address.toLowerCase();
+  const nonce = crypto.randomBytes(16).toString("hex");
+  walletNonces.set(addr, { nonce, expires: Date.now() + NONCE_TTL_MS });
+
+  res.json({ nonce, message: buildSignMessage(address, nonce) });
+});
+
+// ── POST /auth/wallet/login ─────────────────────────────────────────────────
+// Step 2: client sends the signature; we verify it and issue a JWT.
+router.post("/wallet/login", (req, res, next) => {
+  try {
+    const { address, signature } = req.body;
+    if (!address || !signature)
+      return res.status(400).json({ error: "address and signature are required" });
+
+    const addr  = address.toLowerCase();
+    const entry = walletNonces.get(addr);
+    if (!entry || entry.expires < Date.now()) {
+      walletNonces.delete(addr);
+      return res.status(401).json({ error: "Nonce expired — please try again" });
+    }
+
+    // Verify the signature recovers to the claimed address
+    const message = buildSignMessage(address, entry.nonce);
+    let recovered;
+    try {
+      recovered = ethers.verifyMessage(message, signature);
+    } catch {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
+    if (recovered.toLowerCase() !== addr) {
+      return res.status(401).json({ error: "Signature does not match wallet" });
+    }
+
+    // One-time use
+    walletNonces.delete(addr);
+
+    // Find the merchant linked to this wallet
+    const merchant = db.prepare(
+      "SELECT id FROM merchants WHERE lower(wallet_address) = ?"
+    ).get(addr);
+
+    if (!merchant) {
+      return res.status(404).json({ error: "No account is linked to this wallet. Sign up with email first, then this wallet will log you in." });
+    }
 
     res.json({ token: signToken(merchant.id) });
   } catch (err) { next(err); }

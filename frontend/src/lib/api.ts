@@ -128,6 +128,14 @@ export const register = (body: {
 export const login = (email: string, password: string) =>
   apiPost<{ token: string }>("/auth/login", { email, password });
 
+// ── Wallet sign-in (SIWE-style) ───────────────────────────────────────────────
+
+export const walletNonce = (address: string) =>
+  apiPost<{ nonce: string; message: string }>("/auth/wallet/nonce", { address });
+
+export const walletLogin = (address: string, signature: string) =>
+  apiPost<{ token: string }>("/auth/wallet/login", { address, signature });
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 export const getPayment = (id: string) =>

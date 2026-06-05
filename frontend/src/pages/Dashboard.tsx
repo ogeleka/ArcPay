@@ -8,9 +8,12 @@ import { Copy, Check, RefreshCw, ExternalLink, Loader2, AlertCircle, Webhook, Ke
   LayoutDashboard, Receipt, Settings as SettingsIcon, FileText, LifeBuoy,
   Search, Download, Link2, CreditCard, Code2, LogOut, ChevronUp, ChevronDown, X } from "lucide-react";
 
+import { useAccount, useSignMessage } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+
 import {
   getMe, listPayments, createPayment, testWebhook, rotateKey, updateWebhookUrl,
-  updateMerchant, changePassword, register, login,
+  updateMerchant, changePassword, register, login, walletNonce, walletLogin,
   type MerchantProfile, type Payment, type PaymentList,
 } from "@/lib/api";
 import { fmtUsdc, fmtNgn } from "@/lib/utils";
@@ -186,6 +189,53 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
   const [siErr,   setSiErr]   = useState<string | null>(null);
   const [siBusy,  setSiBusy]  = useState(false);
 
+  // wallet auth (shared by sign-in + register auto-fill)
+  const { address, isConnected } = useAccount();
+  const { openConnectModal }     = useConnectModal();
+  const { signMessageAsync }     = useSignMessage();
+  const [walletBusy,  setWalletBusy]  = useState(false);
+  const [pendingLogin, setPendingLogin] = useState(false);
+
+  async function doWalletLogin(addr: string) {
+    setWalletBusy(true); setSiErr(null);
+    try {
+      const { message } = await walletNonce(addr);
+      const signature   = await signMessageAsync({ message });
+      const { token }   = await walletLogin(addr, signature);
+      const m = await getMe(token);
+      localStorage.setItem("arcpay_token", token);
+      onLogin(token, m);
+    } catch (e: unknown) {
+      setSiErr(e instanceof Error ? e.message : "Wallet sign-in failed");
+    } finally { setWalletBusy(false); }
+  }
+
+  function handleWalletSignIn() {
+    setSiErr(null);
+    if (!isConnected || !address) {
+      setPendingLogin(true);
+      openConnectModal?.();
+      return;
+    }
+    doWalletLogin(address);
+  }
+
+  // Connect a wallet just to fill the registration address field
+  const [pendingFill, setPendingFill] = useState(false);
+  function connectWalletForAddress() {
+    if (isConnected && address) { setWallet(address); return; }
+    setPendingFill(true);
+    openConnectModal?.();
+  }
+
+  // React once the wallet connects, depending on what the user asked for
+  useEffect(() => {
+    if (!isConnected || !address) return;
+    if (pendingLogin) { setPendingLogin(false); doWalletLogin(address); }
+    if (pendingFill)  { setPendingFill(false);  setWallet(address); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingLogin, pendingFill, isConnected, address]);
+
   // register wizard
   const [step,        setStep]        = useState<1 | 2>(1);
   const [name,        setName]        = useState("");
@@ -303,6 +353,27 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
               <Button className="w-full" onClick={handleSignIn} disabled={siBusy || !siEmail || !siPass}>
                 {siBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in…</> : "Sign in"}
               </Button>
+
+              {/* divider */}
+              <div className="flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-gray-100" />
+                <span className="text-[10px] uppercase tracking-widest text-gray-300">or</span>
+                <div className="h-px flex-1 bg-gray-100" />
+              </div>
+
+              {/* Wallet sign-in */}
+              <button
+                onClick={handleWalletSignIn}
+                disabled={walletBusy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                {walletBusy
+                  ? <><Loader2 className="w-4 h-4 animate-spin" />Check your wallet…</>
+                  : <><Wallet className="w-4 h-4 text-[#6c47ff]" />Sign in with wallet</>}
+              </button>
+              <p className="text-[11px] text-center text-gray-400 -mt-1">
+                Logs you in if this wallet is linked to an account.
+              </p>
+
               <p className="text-xs text-center text-gray-400">
                 New to ArcPay?{" "}
                 <button onClick={() => switchMode("register")} className="text-[#6c47ff] font-semibold hover:underline">
@@ -448,13 +519,20 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Wallet address <span className="text-red-400">*</span></label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-500">Wallet address <span className="text-red-400">*</span></label>
+                        <button type="button" onClick={connectWalletForAddress}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[#6c47ff] hover:underline">
+                          <Wallet className="w-3.5 h-3.5" />
+                          {isConnected && address ? "Use connected wallet" : "Connect wallet"}
+                        </button>
+                      </div>
                       <div className="relative">
                         <Wallet className="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input value={wallet} onChange={e => setWallet(e.target.value)}
                           placeholder="0xD4F3…7b87" className={`${inputCls} pl-9 font-mono`} />
                       </div>
-                      <p className="text-xs mt-1 text-gray-400">Where your USDC settles — copy it from MetaMask. Non-custodial.</p>
+                      <p className="text-xs mt-1 text-gray-400">Where your USDC settles — connect MetaMask to fill this automatically. Non-custodial.</p>
                       {wallet && !isAddr(wallet) && (
                         <p className="text-xs text-red-500 mt-1">That doesn't look like a valid wallet address.</p>
                       )}
@@ -547,6 +625,22 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [profileWallet,  setProfileWallet]  = useState(merchant.wallet_address);
   const [profileSaving,  setProfileSaving]  = useState(false);
   const [profileMsg,     setProfileMsg]     = useState<string | null>(null);
+
+  // Connect wallet → fill the settlement address field
+  const { address: connectedAddr, isConnected: walletConnected } = useAccount();
+  const { openConnectModal: openWalletModal } = useConnectModal();
+  const [pendingWalletFill, setPendingWalletFill] = useState(false);
+  function connectProfileWallet() {
+    if (walletConnected && connectedAddr) { setProfileWallet(connectedAddr); return; }
+    setPendingWalletFill(true);
+    openWalletModal?.();
+  }
+  useEffect(() => {
+    if (pendingWalletFill && walletConnected && connectedAddr) {
+      setPendingWalletFill(false);
+      setProfileWallet(connectedAddr);
+    }
+  }, [pendingWalletFill, walletConnected, connectedAddr]);
   const [curPass,        setCurPass]        = useState("");
   const [newPass,        setNewPass]        = useState("");
   const [showCurPass,    setShowCurPass]    = useState(false);
@@ -1242,7 +1336,14 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                         className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#6c47ff]" />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Settlement wallet address</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-semibold text-gray-500">Settlement wallet address</label>
+                        <button type="button" onClick={connectProfileWallet}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[#6c47ff] hover:underline">
+                          <Wallet className="w-3.5 h-3.5" />
+                          {walletConnected && connectedAddr ? "Use connected wallet" : "Connect wallet"}
+                        </button>
+                      </div>
                       <div className="relative">
                         <Wallet className="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input value={profileWallet} onChange={e => setProfileWallet(e.target.value)}
@@ -1252,7 +1353,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       {profileWallet && !/^0x[0-9a-fA-F]{40}$/.test(profileWallet) && (
                         <p className="text-xs text-red-500 mt-1">Invalid wallet address</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-1">USDC settles here — ArcPay never holds your funds.</p>
+                      <p className="text-xs text-gray-400 mt-1">USDC settles here — connect MetaMask to fill it. ArcPay never holds your funds.</p>
                     </div>
                     {profileMsg && (
                       <p className={`text-xs ${profileMsg.includes("✓") ? "text-green-700" : "text-red-600"}`}>{profileMsg}</p>
