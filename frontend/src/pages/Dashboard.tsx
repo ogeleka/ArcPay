@@ -16,7 +16,7 @@ import {
   updateMerchant, changePassword, register, login, walletNonce, walletLogin,
   type MerchantProfile, type Payment, type PaymentList,
 } from "@/lib/api";
-import { fmtUsdc, fmtNgn } from "@/lib/utils";
+import { fmtUsdc } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
@@ -1176,7 +1176,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                           <StatusBadge status={p.status} />
                           <span className="font-mono text-xs text-gray-400">{trunc(p.id, 10)}</span>
                           <span className="ml-auto text-sm font-medium">{fmtUsdc(p.amount)}</span>
-                          {p.amount_ngn && <span className="text-xs text-gray-400 w-20 text-right">{fmtNgn(p.amount_ngn)}</span>}
+                          {localRate && <span className="text-xs text-gray-400 w-24 text-right">{localSym}{Math.round(p.amount / 1e6 * localRate).toLocaleString()}</span>}
                         </div>
                       ))}
                     </div>
@@ -1266,7 +1266,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                               </td>
                               <td className="px-6 py-3">
                                 <span className="font-medium">{fmtUsdc(p.amount)}</span>
-                                {p.amount_ngn && <span className="block text-xs text-gray-400">{fmtNgn(p.amount_ngn)}</span>}
+                                {localRate && <span className="block text-xs text-gray-400">{localSym}{Math.round(p.amount / 1e6 * localRate).toLocaleString()}</span>}
                               </td>
                               <td className="px-6 py-3"><StatusBadge status={p.status} /></td>
                               <td className="px-6 py-3 font-mono text-xs text-gray-400">{p.payer ? trunc(p.payer) : "—"}</td>
