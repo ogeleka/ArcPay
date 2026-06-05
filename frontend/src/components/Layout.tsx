@@ -4,9 +4,11 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 export default function Layout() {
   const { pathname } = useLocation();
   // Hide the nav wallet button on the checkout page — it's self-contained
-  const isCheckout = pathname.startsWith("/checkout");
+  const isCheckout  = pathname.startsWith("/checkout");
+  // Dashboard has its own full-screen layout with JWT auth — no wallet button needed
+  const isDashboard = pathname.startsWith("/dashboard");
   // On the landing page the nav floats transparently over the dark Arc hero
-  const isLanding = pathname === "/";
+  const isLanding   = pathname === "/";
 
   const linkCls = isLanding
     ? "text-sm text-blue-100/80 hover:text-white transition-colors"
@@ -36,7 +38,7 @@ export default function Layout() {
             ) : (
               <Link to="/dashboard" className={linkCls}>Dashboard</Link>
             )}
-            {!isCheckout && !isLanding && <ConnectButton showBalance={false} chainStatus="icon" />}
+            {!isCheckout && !isLanding && !isDashboard && <ConnectButton showBalance={false} chainStatus="icon" />}
           </nav>
         </div>
       </header>
