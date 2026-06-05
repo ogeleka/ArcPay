@@ -89,19 +89,32 @@ export default function Docs() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex gap-10">
+    <>
+      {/* ── Header band — Arc theme ── */}
+      <div className="arc-panel">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+          <p className="arc-kicker text-xs font-medium mb-3">{"{ DEVELOPER DOCS }"}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-white mb-3">Build with ArcPay</h1>
+          <p className="text-blue-100/80 max-w-xl">
+            Accept USDC payments on Arc in under 10 minutes. Two API calls, a signed webhook,
+            and funds settle straight to your wallet.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex gap-10">
 
       {/* ── Left nav ── */}
       <aside className="hidden lg:block w-52 shrink-0">
         <div className="sticky top-24 space-y-1">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Docs</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">On this page</p>
           {NAV.map(({ id, label }) => (
             <a key={id} href={`#${id}`}
               onClick={() => setActive(id)}
-              className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              className={`block px-3 py-1.5 rounded-lg text-sm transition-colors border-l-2 ${
                 active === id
-                  ? "bg-primary/10 text-[#6c47ff] font-semibold"
-                  : "text-gray-500 hover:text-gray-900"
+                  ? "border-[#6c47ff] bg-primary/5 text-[#6c47ff] font-semibold"
+                  : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-200"
               }`}>
               {label}
             </a>
@@ -112,39 +125,37 @@ export default function Docs() {
       {/* ── Content ── */}
       <div ref={contentRef} className="flex-1 min-w-0">
 
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">ArcPay Docs</h1>
-          <p className="text-gray-500">Accept USDC payments on Arc in under 10 minutes.</p>
-        </div>
-
         {/* Quick Start */}
         <Section id="quickstart" title="Quick Start">
           <p>Accept your first USDC payment in under 10 minutes.</p>
-          <H3>1. Sign up & get your API key</H3>
+          <H3>1. Create an account & get your API key</H3>
+          <p>Register from the <a href="/dashboard" className="text-[#6c47ff] underline">dashboard</a>, or call the API directly. You get back an API key and a webhook secret — both shown once.</p>
           <CodeBlock snippets={{
-            cURL: `curl -X POST http://localhost:3001/merchants \\
+            cURL: `curl -X POST http://localhost:3001/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "Footie Lagos",
     "email": "hello@footie.ng",
+    "password": "a-strong-password",
     "wallet_address": "0xYourWalletAddress",
     "webhook_url": "https://footie.ng/webhooks/arcpay"
   }'
 
-# Response: { merchant_id, api_key, webhook_secret }
-# Store these safely — api_key is shown ONCE.`,
-            Node: `const res = await fetch('http://localhost:3001/merchants', {
+# Response: { token, merchant_id, api_key, webhook_secret }
+# Store api_key + webhook_secret safely — shown ONCE.`,
+            Node: `const res = await fetch('http://localhost:3001/auth/register', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     name: 'Footie Lagos',
     email: 'hello@footie.ng',
+    password: 'a-strong-password',
     wallet_address: '0xYourWalletAddress',
     webhook_url: 'https://footie.ng/webhooks/arcpay',
   }),
 });
 const { api_key, webhook_secret } = await res.json();
-// Store these safely — api_key is shown ONCE.`,
+// Store these safely — shown ONCE.`,
           }} />
 
           <H3>2. Create a payment</H3>
@@ -267,7 +278,7 @@ def webhook():
   "order_id":    "FOOTIE-1021",
   "status":      "pending",
   "expires_at":  "2026-06-01T22:15:00.000Z",
-  "payment_url": "http://localhost:3001/pay/0xabc123..."
+  "payment_url": "http://localhost:3000/checkout/0xabc123..."
 }`,
           }} />
         </Section>
@@ -312,9 +323,8 @@ def webhook():
           <H3>Events</H3>
           <div className="space-y-1">
             {[
-              ["payment.paid",     "Customer paid — funds in escrow"],
-              ["payment.released", "Merchant released — funds in wallet"],
-              ["payment.refunded", "Merchant refunded — funds back to payer"],
+              ["payment.paid",     "Customer paid — funds settled straight to your wallet"],
+              ["payment.refunded", "Merchant refunded — funds returned to the payer"],
             ].map(([e, d]) => (
               <div key={e} className="flex gap-3 text-sm">
                 <InlineCode>{e}</InlineCode>
@@ -398,7 +408,7 @@ await arcpay.checkout({ amount: 4500, currency: 'NGN', orderId: 'FOOTIE-1021' })
         <Section id="footie" title="Footie Store — Full Walkthrough">
           <p>
             Footie Lagos sells premium sneakers priced in Naira. Here's the exact integration
-            that powers the <a href="/store" className="text-[#6c47ff] underline">live demo store</a>.
+            that powers the <a href="/demo" className="text-[#6c47ff] underline">live demo</a>.
           </p>
 
           <H3>Step 1 — Footie's server creates a payment</H3>
@@ -491,5 +501,6 @@ if (payment.status !== 'paid') throw new Error('Not paid yet');`,
 
       </div>
     </div>
+    </>
   );
 }

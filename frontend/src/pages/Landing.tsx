@@ -130,30 +130,6 @@ function CopyBtn({ text }: { text: string }) {
   );
 }
 
-// ─── Comparison table ─────────────────────────────────────────────────────────
-
-const COMPARISON = [
-  { label: "Transaction fee",     arcpay: "0.5% flat",       paystack: "1.5% + ₦100",  flutter: "1.4%"          },
-  { label: "Settlement time",     arcpay: "< 1 second ⚡",   paystack: "1–3 days",      flutter: "1–3 days"      },
-  { label: "FX risk",             arcpay: "None (USDC)",      paystack: "High (NGN)",    flutter: "High (NGN)"    },
-  { label: "Bank account needed", arcpay: "No",               paystack: "Yes",           flutter: "Yes"           },
-  { label: "Non-custodial",       arcpay: "Yes",              paystack: "No",            flutter: "No"            },
-  { label: "Local currency",      arcpay: "4 (live rate)",    paystack: "NGN only",      flutter: "NGN only"      },
-  { label: "Webhook signed",      arcpay: "Yes (HMAC-SHA256)",paystack: "Yes",           flutter: "Yes"           },
-];
-
-function CompCell({ value, highlight }: { value: string; highlight?: boolean }) {
-  const isYes = value === "Yes" || value.startsWith("Yes") || value.startsWith("<") || value.startsWith("None") || value.startsWith("0.5") || value.startsWith("4");
-  const isNo  = value === "No"  || value.startsWith("No") || value.includes("days") || value.startsWith("High") || value.startsWith("1.5") || value.startsWith("1.4") || value.includes("only");
-  return (
-    <td className={`px-4 py-3 text-sm text-center ${highlight ? "bg-[#faf8ff]" : ""}`}>
-      <span className={isYes && highlight ? "text-green-700 font-semibold" : isNo ? "text-gray-400" : ""}>
-        {value}
-      </span>
-    </td>
-  );
-}
-
 // ─── Supported markets ────────────────────────────────────────────────────────
 
 const COUNTRIES = [
@@ -410,42 +386,6 @@ export default function Landing() {
         </div>
         <div className="text-center mt-6">
           <Link to="/docs"><Button variant="outline">Read the full docs →</Button></Link>
-        </div>
-      </section>
-
-      {/* ── Comparison table ── */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              ArcPay vs the alternatives
-            </h2>
-            <p className="text-gray-500">
-              Built for the Arc era — not retrofitted onto old rails.
-            </p>
-          </div>
-          <div className="rounded-2xl bg-white shadow-sm overflow-hidden border border-gray-100">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-gray-400 font-medium text-xs uppercase tracking-wide">Feature</th>
-                  <th className="px-4 py-3 text-center bg-[#faf8ff] text-[#6c47ff] font-bold">ArcPay</th>
-                  <th className="px-4 py-3 text-center text-gray-400 font-medium">Paystack</th>
-                  <th className="px-4 py-3 text-center text-gray-400 font-medium">Flutterwave</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map(({ label, arcpay, paystack, flutter }, i) => (
-                  <tr key={label} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className="px-4 py-3 text-gray-700 font-medium">{label}</td>
-                    <CompCell value={arcpay}   highlight />
-                    <CompCell value={paystack} />
-                    <CompCell value={flutter}  />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
 

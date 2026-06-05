@@ -6,7 +6,7 @@ import {
 import { Copy, Check, RefreshCw, ExternalLink, Loader2, AlertCircle, Webhook, Key, Plus, Eye, EyeOff, ShieldCheck,
   ShoppingBag, Repeat, User, Heart, Sparkles, ArrowLeft, ArrowRight, Wallet,
   LayoutDashboard, Receipt, Settings as SettingsIcon, FileText, LifeBuoy,
-  Search, Download, Link2, CreditCard, Code2, LogOut } from "lucide-react";
+  Search, Download, Link2, CreditCard, Code2, LogOut, ChevronUp, ChevronDown } from "lucide-react";
 
 import {
   getMe, listPayments, createPayment, testWebhook, rotateKey, updateWebhookUrl,
@@ -576,6 +576,14 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   // Shell + payments-page state
   const [activeView,   setActiveView]   = useState<"home" | "payments" | "settings">("home");
   const [settingsTab,  setSettingsTab]  = useState<"profile" | "password" | "apikey" | "webhook" | "currency" | "snippet">("profile");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Open a specific settings panel from the sidebar
+  function openSetting(tab: typeof settingsTab) {
+    setSettingsTab(tab);
+    setActiveView("settings");
+    setSettingsOpen(true);
+  }
   const [search,     setSearch]     = useState("");
   const [exporting,  setExporting]  = useState(false);
 
@@ -739,6 +747,17 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     { id: "settings", label: "Settings",  icon: SettingsIcon },
   ] as const;
 
+  const SETTINGS_TABS = [
+    { id: "profile",  label: "Profile",            icon: User },
+    { id: "password", label: "Password",           icon: ShieldCheck },
+    { id: "apikey",   label: "API Key",            icon: Key },
+    { id: "webhook",  label: "Webhook",            icon: Webhook },
+    { id: "currency", label: "Currency & markup",  icon: Repeat },
+    { id: "snippet",  label: "Integration snippet", icon: Code2 },
+  ] as const;
+
+  const settingsLabel = SETTINGS_TABS.find(t => t.id === settingsTab)?.label ?? "Settings";
+
   const balanceStr = merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "—";
 
   // "Your tools" cards on Home — tailored to the merchant's business type
@@ -787,38 +806,70 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] flex">
-      {/* ─── Sidebar (B2) ─── */}
-      <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-white border-r border-gray-200 sticky top-0 h-screen">
-        <div className="px-5 py-5 flex items-center gap-2 border-b border-gray-100">
-          <span className="text-xl">⚡</span><span className="font-bold tracking-tight">ArcPay</span>
+      {/* ─── Sidebar — Arc navy theme ─── */}
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 arc-sidebar sticky top-0 h-screen text-blue-100">
+        <div className="px-5 py-5 flex items-center gap-2 border-b border-white/10">
+          <span className="text-xl">⚡</span>
+          <span className="font-bold tracking-tight text-white">ArcPay</span>
         </div>
+
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {NAV.map(({ id, label, icon: Icon }) => (
+          {/* Dashboard + Payments */}
+          {([NAV[0], NAV[1]] as const).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setActiveView(id)}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeView === id ? "bg-[#6c47ff]/10 text-[#6c47ff]" : "text-gray-600 hover:bg-gray-50"}`}>
+                activeView === id
+                  ? "bg-white/10 text-white"
+                  : "text-blue-100/70 hover:bg-white/5 hover:text-white"}`}>
               <Icon className="w-4 h-4" /> {label}
             </button>
           ))}
 
-          <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-300">Payment tools</p>
+          {/* Settings — collapsible dropdown */}
+          <button
+            onClick={() => { setSettingsOpen(o => !o); }}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeView === "settings"
+                ? "bg-white/10 text-white"
+                : "text-blue-100/70 hover:bg-white/5 hover:text-white"}`}>
+            <SettingsIcon className="w-4 h-4" /> Settings
+            {settingsOpen
+              ? <ChevronUp className="w-3.5 h-3.5 ml-auto" />
+              : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
+          </button>
+          {settingsOpen && (
+            <div className="ml-3 pl-3 border-l border-white/10 space-y-0.5 py-1">
+              {SETTINGS_TABS.map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => openSetting(id)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    activeView === "settings" && settingsTab === id
+                      ? "bg-[#c7c2f7]/20 text-white"
+                      : "text-blue-100/60 hover:bg-white/5 hover:text-white"}`}>
+                  <Icon className="w-3.5 h-3.5" /> {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <p className="px-3 pt-5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-200/40">Payment tools</p>
           <button onClick={() => setShowModal(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-blue-100/70 hover:bg-white/5 hover:text-white transition-colors">
             <Link2 className="w-4 h-4" /> Payment links
           </button>
           {["Checkout pages", "Invoices", "Mass payouts"].map(t => (
-            <div key={t} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 cursor-default">
+            <div key={t} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-blue-100/30 cursor-default">
               <CreditCard className="w-4 h-4" /> {t}
-              <span className="ml-auto text-[9px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">soon</span>
+              <span className="ml-auto text-[9px] bg-white/10 text-blue-100/50 px-1.5 py-0.5 rounded-full">soon</span>
             </div>
           ))}
 
-          <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-300">Developers</p>
-          <a href="/docs" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50"><FileText className="w-4 h-4" /> API Docs</a>
-          <a href="/docs" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50"><Code2 className="w-4 h-4" /> SDK Docs</a>
+          <p className="px-3 pt-5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-200/40">Developers</p>
+          <a href="/docs" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-blue-100/70 hover:bg-white/5 hover:text-white transition-colors"><FileText className="w-4 h-4" /> API Docs</a>
+          <a href="/docs" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-blue-100/70 hover:bg-white/5 hover:text-white transition-colors"><Code2 className="w-4 h-4" /> SDK Docs</a>
         </nav>
-        <div className="px-5 py-4 border-t border-gray-100">
-          <a href="mailto:support@arcpay.dev" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600">
+
+        <div className="px-5 py-4 border-t border-white/10">
+          <a href="mailto:support@arcpay.dev" className="flex items-center gap-2 text-xs text-blue-100/50 hover:text-white transition-colors">
             <LifeBuoy className="w-3.5 h-3.5" /> support@arcpay.dev
           </a>
         </div>
@@ -857,13 +908,23 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
         <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           <div className="max-w-5xl mx-auto space-y-6">
 
-            {/* identity row */}
-            <div className="flex items-center justify-between">
+            {/* identity banner — Arc theme */}
+            <div className="arc-panel rounded-2xl px-5 py-4 flex items-center justify-between gap-4 overflow-hidden">
               <div className="min-w-0">
-                <p className="font-bold text-gray-900 truncate">{merchant.name}</p>
-                <p className="text-xs text-gray-400 font-mono truncate">{merchant.wallet_address || "No wallet set"}</p>
+                <p className="arc-kicker text-[10px] font-medium mb-1">{`{ ${activeView === "home" ? "MERCHANT" : activeView.toUpperCase()} }`}</p>
+                <p className="font-bold text-white truncate text-lg">{merchant.name}</p>
+                <p className="text-xs text-blue-100/60 font-mono truncate">{merchant.wallet_address || "No wallet set"}</p>
               </div>
-              {!hasWallet && <span className="shrink-0 text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-semibold">Verify account</span>}
+              <div className="shrink-0 text-right">
+                {!hasWallet ? (
+                  <span className="text-[10px] bg-amber-400/20 text-amber-200 px-2 py-1 rounded-full font-semibold">Verify account</span>
+                ) : (
+                  <>
+                    <p className="text-[10px] uppercase tracking-wide text-blue-100/50">USDC Balance</p>
+                    <p className="text-xl font-bold text-white">{balanceStr}</p>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* ════════ HOME ════════ */}
@@ -1109,21 +1170,21 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
             {/* ════════ SETTINGS ════════ */}
             <div className={activeView === "settings" ? "space-y-5 max-w-xl" : "hidden"}>
 
-              {/* ── Picker ── */}
+              {/* ── Header — chosen from the sidebar dropdown ── */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-2">What would you like to change?</label>
-                <select
-                  value={settingsTab}
-                  onChange={e => setSettingsTab(e.target.value as typeof settingsTab)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#6c47ff] bg-white cursor-pointer"
-                >
-                  <option value="profile">👤  Profile — name, email, wallet address</option>
-                  <option value="password">🔒  Password</option>
-                  <option value="apikey">🔑  API Key</option>
-                  <option value="webhook">🔗  Webhook URL &amp; signing secret</option>
-                  <option value="currency">💱  Currency &amp; FX markup</option>
-                  <option value="snippet">📋  Integration snippet</option>
-                </select>
+                <h2 className="text-lg font-bold text-gray-900">{settingsLabel}</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Pick another option from <span className="font-medium text-gray-500">Settings</span> in the sidebar.</p>
+              </div>
+
+              {/* Mobile settings tabs (sidebar is hidden on small screens) */}
+              <div className="lg:hidden flex gap-1.5 flex-wrap">
+                {SETTINGS_TABS.map(({ id, label }) => (
+                  <button key={id} onClick={() => setSettingsTab(id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                      settingsTab === id ? "bg-[#6c47ff] text-white" : "bg-gray-100 text-gray-500"}`}>
+                    {label}
+                  </button>
+                ))}
               </div>
 
               {/* ── Profile ── */}
