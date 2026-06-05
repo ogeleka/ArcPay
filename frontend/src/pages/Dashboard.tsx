@@ -58,13 +58,14 @@ function CreateModal({ token, onClose }: { token: string; onClose: () => void })
   const [amount,   setAmount]   = useState("");
   const [currency, setCurrency] = useState<"USDC" | "NGN">("USDC");
   const [loading,  setLoading]  = useState(false);
+  const [createErr, setCreateErr] = useState<string | null>(null);
   const [result,   setResult]   = useState<{ url: string; qr: string } | null>(null);
   const { copied, copy } = useCopy();
 
   async function submit() {
     const n = parseFloat(amount);
     if (!n || n <= 0) return;
-    setLoading(true);
+    setLoading(true); setCreateErr(null);
     try {
       const raw = currency === "NGN" ? n : Math.round(n * 1e6);
       const res = await createPayment(token, { amount: raw, currency });
@@ -72,7 +73,7 @@ function CreateModal({ token, onClose }: { token: string; onClose: () => void })
       const checkoutUrl = `${window.location.origin}/checkout/${res.payment_id}`;
       setResult({ url: checkoutUrl, qr: checkoutUrl });
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Failed");
+      setCreateErr(e instanceof Error ? e.message : "Failed to create payment");
     } finally { setLoading(false); }
   }
 
@@ -98,13 +99,18 @@ function CreateModal({ token, onClose }: { token: string; onClose: () => void })
                   Amount ({currency === "NGN" ? "whole ₦" : "USDC"})
                 </label>
                 <input
-                  type="number" value={amount} onChange={e => setAmount(e.target.value)}
+                  type="number" value={amount} onChange={e => { setAmount(e.target.value); setCreateErr(null); }}
                   onKeyDown={e => e.key === "Enter" && submit()}
                   placeholder={currency === "NGN" ? "e.g. 4500" : "e.g. 5.00"}
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#6c47ff]"
                 />
                 {currency === "NGN" && <p className="text-xs text-gray-400 mt-1">Converted to USDC at the live rate</p>}
               </div>
+              {createErr && (
+                <div className="flex gap-2 items-center rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <AlertCircle className="w-4 h-4 shrink-0" />{createErr}
+                </div>
+              )}
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
                 <Button className="flex-1" onClick={submit} disabled={loading || !amount}>
@@ -307,7 +313,16 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
     } catch { setSiErr("Could not load profile."); }
   }
 
-  function switchMode(m: AuthMode) { setMode(m); setRegErr(null); setSiErr(null); }
+  function switchMode(m: AuthMode) {
+    setMode(m); setRegErr(null); setSiErr(null);
+    if (m === "register") {
+      setSiEmail(""); setSiPass("");
+    } else {
+      setStep(1); setName(""); setBusinessType(null);
+      setRegEmail(""); setRegPass(""); setWallet("");
+      setWebsite(""); setUseCase(null);
+    }
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
@@ -662,8 +677,10 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [markupMsg,     setMarkupMsg]     = useState<string | null>(null);
 
   // Rotate key state
-  const [rotating,   setRotating]   = useState(false);
-  const [newKey,     setNewKey]     = useState<string | null>(null);
+  const [rotating,      setRotating]      = useState(false);
+  const [confirmRotate, setConfirmRotate] = useState(false);
+  const [rotateErr,     setRotateErr]     = useState<string | null>(null);
+  const [newKey,        setNewKey]        = useState<string | null>(null);
   const { copied: keyCopied, copy: copyKey } = useCopy();
   const { copy: copyUrl } = useCopy();
 
@@ -671,6 +688,13 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [activeView,   setActiveView]   = useState<"home" | "payments" | "settings">("home");
   const [settingsTab,  setSettingsTab]  = useState<"profile" | "password" | "apikey" | "webhook" | "currency" | "snippet">("profile");
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Tick every second so "updated X ago" stays current
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Open a specific settings panel from the sidebar
   function openSetting(tab: typeof settingsTab) {
@@ -747,13 +771,13 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   }
 
   async function handleRotate() {
-    if (!confirm("Revoke the current API key and issue a new one?")) return;
-    setRotating(true);
+    if (!confirmRotate) { setConfirmRotate(true); return; }
+    setConfirmRotate(false); setRotateErr(null); setRotating(true);
     try {
       const r = await rotateKey(token);
       setNewKey(r.api_key);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Failed");
+      setRotateErr(e instanceof Error ? e.message : "Failed to rotate key");
     } finally { setRotating(false); }
   }
 
@@ -1195,7 +1219,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <span className="text-[10px] font-normal text-[#6c47ff]">● live</span>
                       {lastRefresh && (
                         <span className="text-[10px] text-gray-300 hidden sm:inline">
-                          updated {Math.round((Date.now() - lastRefresh.getTime()) / 1000)}s ago
+                          updated {Math.round((now - lastRefresh.getTime()) / 1000)}s ago
                         </span>
                       )}
                     </div>
@@ -1433,9 +1457,24 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                         <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 text-xs text-amber-700">
                           Your API key was shown once at registration. Rotate below to get a new one.
                         </div>
-                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={handleRotate} disabled={rotating}>
-                          {rotating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Rotate key to reveal a new one
-                        </Button>
+                        {confirmRotate && (
+                          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700 space-y-2">
+                            <p className="font-semibold flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" />This will revoke your current key immediately.</p>
+                            <p>Any server using the old key will start getting 401 errors. Update your environment variables right after.</p>
+                            <div className="flex gap-2 pt-0.5">
+                              <button onClick={() => setConfirmRotate(false)} className="flex-1 rounded-lg border border-red-200 py-1.5 font-semibold hover:bg-red-100 transition-colors">Cancel</button>
+                              <button onClick={handleRotate} disabled={rotating} className="flex-1 rounded-lg bg-red-600 text-white py-1.5 font-semibold hover:bg-red-700 transition-colors disabled:opacity-50">
+                                {rotating ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : "Yes, rotate key"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {rotateErr && <p className="text-xs text-red-600">{rotateErr}</p>}
+                        {!confirmRotate && (
+                          <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={handleRotate} disabled={rotating}>
+                            {rotating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Rotate key to reveal a new one
+                          </Button>
+                        )}
                       </>
                     )}
                   </CardBody>

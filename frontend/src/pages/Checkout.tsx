@@ -171,6 +171,25 @@ export default function Checkout() {
   }, [txFailed]);
 
   // ── Main flow ───────────────────────────────────────────────────────────────
+  const runPay = useCallback(async () => {
+    if (!payment) return;
+    setStep("paying"); setErrMsg(null);
+    payStartRef.current = Date.now();
+    try {
+      const hash = await writeContractAsync({
+        address: payment.arcpay_address as `0x${string}`,
+        abi: ARCPAY_ABI,
+        functionName: "pay",
+        args: [payment.payment_id as `0x${string}`],
+      });
+      setTxHash(hash);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Transaction failed";
+      setErrMsg(msg.includes("user rejected") ? "You rejected the transaction." : msg);
+      setStep("failed");
+    }
+  }, [payment, writeContractAsync]);
+
   const runApprove = useCallback(async () => {
     if (!payment) return;
     await refetchAllowance();
@@ -192,26 +211,7 @@ export default function Checkout() {
       setErrMsg(msg.includes("user rejected") ? "You rejected the transaction." : msg);
       setStep("failed");
     }
-  }, [payment, allowance, writeContractAsync, refetchAllowance]);
-
-  const runPay = useCallback(async () => {
-    if (!payment) return;
-    setStep("paying"); setErrMsg(null);
-    payStartRef.current = Date.now();
-    try {
-      const hash = await writeContractAsync({
-        address: payment.arcpay_address as `0x${string}`,
-        abi: ARCPAY_ABI,
-        functionName: "pay",
-        args: [payment.payment_id as `0x${string}`],
-      });
-      setTxHash(hash);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Transaction failed";
-      setErrMsg(msg.includes("user rejected") ? "You rejected the transaction." : msg);
-      setStep("failed");
-    }
-  }, [payment, writeContractAsync]);
+  }, [payment, allowance, writeContractAsync, refetchAllowance, runPay]);
 
   const handlePay = useCallback(async () => {
     if (!payment) return;
