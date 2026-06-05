@@ -122,9 +122,14 @@ router.post("/", requireApiKey, async (req, res, next) => {
       metadata ? JSON.stringify(metadata) : null, expiresAt,
     );
 
-    // Register payment on-chain (non-blocking — respond to merchant immediately)
-    registerOnChain(paymentId, merchantRow.wallet_address, amountUsdc, expiresAt)
-      .catch(err => console.error("[chain] createPayment failed:", err.message));
+    // Register payment on-chain — await so the checkout URL is only returned after
+    // the tx is mined. Arc has sub-second finality so this adds ~1-2s of latency.
+    try {
+      await registerOnChain(paymentId, merchantRow.wallet_address, amountUsdc, expiresAt);
+    } catch (err) {
+      console.error("[chain] createPayment failed:", err.message);
+      // Non-fatal: customer checkout will detect unregistered and show a retry
+    }
 
     const response = {
       payment_id:  paymentId,

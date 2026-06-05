@@ -129,7 +129,7 @@ export default function Checkout() {
   }, [payment?.expires_at]);
 
   // ── On-chain payment state ──────────────────────────────────────────────────
-  const { data: onChainPayment, refetch: refetchOnChain } = useReadContract({
+  const { refetch: refetchOnChain } = useReadContract({
     address: payment?.arcpay_address as `0x${string}`,
     abi: ARCPAY_ABI,
     functionName: "payments",
@@ -151,10 +151,7 @@ export default function Checkout() {
 
   useEffect(() => {
     if (!txConfirmed || !txHash) return;
-    if (step === "creating") {
-      setTxHash(undefined);
-      runApprove();
-    } else if (step === "approving") {
+    if (step === "approving") {
       setTxHash(undefined);
       runPay();
     } else if (step === "paying") {
@@ -174,31 +171,6 @@ export default function Checkout() {
   }, [txFailed]);
 
   // ── Main flow ───────────────────────────────────────────────────────────────
-  const runCreate = useCallback(async () => {
-    if (!payment) return;
-    setStep("creating"); setErrMsg(null);
-    try {
-      const hash = await writeContractAsync({
-        address: payment.arcpay_address as `0x${string}`,
-        abi: ARCPAY_ABI,
-        functionName: "createPayment",
-        args: [
-          payment.payment_id as `0x${string}`,
-          payment.merchant_address as `0x${string}`,
-          BigInt(payment.amount),
-          payment.expires_at
-            ? BigInt(Math.floor(new Date(payment.expires_at).getTime() / 1000))
-            : 0n,
-        ],
-      });
-      setTxHash(hash);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Transaction failed";
-      setErrMsg(msg.includes("user rejected") ? "You rejected the transaction." : msg);
-      setStep("failed");
-    }
-  }, [payment, writeContractAsync]);
-
   const runApprove = useCallback(async () => {
     if (!payment) return;
     await refetchAllowance();
@@ -244,13 +216,28 @@ export default function Checkout() {
   const handlePay = useCallback(async () => {
     if (!payment) return;
     setErrMsg(null);
-    await refetchOnChain();
-    // [0]=payer [1]=merchant [2]=amount [3]=status
-    const merchantOnChain = (onChainPayment as readonly [`0x${string}`, `0x${string}`, bigint, number] | undefined)?.[1];
-    const isRegistered = merchantOnChain && merchantOnChain !== "0x0000000000000000000000000000000000000000";
-    if (!isRegistered) { await runCreate(); return; }
+    setStep("checking");
+
+    // Poll until the backend's on-chain registration is confirmed (up to 15s)
+    let isRegistered = false;
+    for (let i = 0; i < 15; i++) {
+      const { data: fresh } = await refetchOnChain();
+      const merchant = (fresh as readonly [`0x${string}`, `0x${string}`, ...unknown[]] | undefined)?.[1] as string | undefined;
+      if (merchant && merchant !== "0x0000000000000000000000000000000000000000") {
+        isRegistered = true;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    if (!isRegistered) {
+      setErrMsg("Payment registration is taking longer than expected. Please try again in a moment.");
+      setStep("idle");
+      return;
+    }
+
     await runApprove();
-  }, [payment, onChainPayment, refetchOnChain, runCreate, runApprove]);
+  }, [payment, refetchOnChain, runApprove]);
 
   // ── Derived UI state ────────────────────────────────────────────────────────
   const isExpired = payment?.status === "expired" || timeLeft === 0 && !!payment?.expires_at;
@@ -368,11 +355,14 @@ export default function Checkout() {
             {/* Steps */}
             {!settled && !isAlreadyPaid && !isExpired && (
               <>
-                {["creating", "approving", "paying"].includes(step) && (
+                {["checking", "creating", "approving", "paying"].includes(step) && (
                   <div className="rounded-xl bg-gray-50 p-3 space-y-2">
-                    <StepRow label="Payment registered on-chain ✓" state="done" />
-                    <StepRow label="Approve USDC"                  state={stepState("approving")} />
-                    <StepRow label="Send payment"                  state={stepState("paying")} />
+                    <StepRow
+                      label={step === "checking" ? "Confirming registration on-chain…" : "Payment registered on-chain ✓"}
+                      state={step === "checking" ? "active" : "done"}
+                    />
+                    <StepRow label="Approve USDC"  state={stepState("approving")} />
+                    <StepRow label="Send payment"  state={stepState("paying")} />
                   </div>
                 )}
 
@@ -395,11 +385,12 @@ export default function Checkout() {
                   </Button>
                 ) : step === "failed" ? (
                   <Button className="w-full" onClick={handlePay}>Retry</Button>
-                ) : ["creating", "approving", "paying"].includes(step) ? (
+                ) : ["checking", "creating", "approving", "paying"].includes(step) ? (
                   <Button className="w-full" disabled>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {step === "creating"  ? "Registering on-chain…" :
-                     step === "approving" ? "Approving USDC…"       :
+                    {step === "checking"  ? "Verifying on-chain registration…" :
+                     step === "creating"  ? "Registering on-chain…"            :
+                     step === "approving" ? "Approving USDC…"                  :
                                            "Sending payment…"}
                   </Button>
                 ) : (
