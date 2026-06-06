@@ -29,7 +29,6 @@ export default function Layout() {
           <nav className="flex items-center gap-5">
             <Link to="/docs" className={`${linkCls} hidden sm:block`}>Docs</Link>
             <Link to="/demo"  className={`${linkCls} hidden sm:block`}>Try demo</Link>
-            <Link to="/store" className={`${linkCls} hidden sm:block`}>Store</Link>
             {isLanding ? (
               <Link to="/dashboard"
                 className="rounded-xl bg-[#c7c2f7] text-[#0a1734] text-sm font-semibold px-4 h-9 inline-flex items-center hover:bg-white transition-colors">

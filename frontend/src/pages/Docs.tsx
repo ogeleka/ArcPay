@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Check, Copy } from "lucide-react";
 
+// Base URL of this deployment — examples always match where the docs are served from
+const API_BASE = typeof window !== "undefined" ? window.location.origin : "https://arc.ogsnap.online";
+
 // ─── Code block with language tabs + copy ────────────────────────────────────
 
 type Lang = "cURL" | "Node" | "Python";
@@ -131,7 +134,7 @@ export default function Docs() {
           <H3>1. Create an account & get your API key</H3>
           <p>Register from the <a href="/dashboard" className="text-[#6c47ff] underline">dashboard</a>, or call the API directly. You get back an API key and a webhook secret — both shown once.</p>
           <CodeBlock snippets={{
-            cURL: `curl -X POST http://localhost:3001/auth/register \\
+            cURL: `curl -X POST ${API_BASE}/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "Footie Lagos",
@@ -143,7 +146,7 @@ export default function Docs() {
 
 # Response: { token, merchant_id, api_key, webhook_secret }
 # Store api_key + webhook_secret safely — shown ONCE.`,
-            Node: `const res = await fetch('http://localhost:3001/auth/register', {
+            Node: `const res = await fetch('${API_BASE}/auth/register', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -160,13 +163,13 @@ const { api_key, webhook_secret } = await res.json();
 
           <H3>2. Create a payment</H3>
           <CodeBlock snippets={{
-            cURL: `curl -X POST http://localhost:3001/payments \\
+            cURL: `curl -X POST ${API_BASE}/payments \\
   -H "X-Api-Key: YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "amount": 1000000 }'   # 1 USDC = 1 000 000 micro-units
 
 # Response includes payment_url — redirect your customer there.`,
-            Node: `const { payment_url } = await fetch('http://localhost:3001/payments', {
+            Node: `const { payment_url } = await fetch('${API_BASE}/payments', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -180,7 +183,7 @@ res.redirect(payment_url);`,
             Python: `import requests, os
 
 resp = requests.post(
-    "http://localhost:3001/payments",
+    "${API_BASE}/payments",
     headers={"X-Api-Key": os.environ["ARCPAY_KEY"]},
     json={"amount": 1000000},
 )
@@ -229,7 +232,7 @@ def webhook():
         <Section id="auth" title="Authentication">
           <p>Pass your API key in the <InlineCode>X-Api-Key</InlineCode> header on every request.</p>
           <CodeBlock snippets={{
-            cURL: `curl http://localhost:3001/payments \\
+            cURL: `curl ${API_BASE}/payments \\
   -H "X-Api-Key: YOUR_SECRET_API_KEY"`,
           }} />
           <p className="text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
@@ -278,7 +281,7 @@ def webhook():
   "order_id":    "FOOTIE-1021",
   "status":      "pending",
   "expires_at":  "2026-06-01T22:15:00.000Z",
-  "payment_url": "http://localhost:3000/checkout/0xabc123..."
+  "payment_url": "${API_BASE}/checkout/0xabc123..."
 }`,
           }} />
         </Section>
@@ -290,7 +293,7 @@ def webhook():
             ArcPay converts to USDC at the live rate (locked at creation) so the amount can't drift during checkout.
           </p>
           <CodeBlock snippets={{
-            cURL: `curl -X POST http://localhost:3001/payments \\
+            cURL: `curl -X POST ${API_BASE}/payments \\
   -H "X-Api-Key: YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -308,7 +311,7 @@ def webhook():
 // payment.amount_usdc → "2903226"  (≈ 2.90 USDC at ₦1,550/USD)
 // payment.rate        → 1550        (locked — won't drift)`,
             Python: `resp = requests.post(
-    "http://localhost:3001/payments",
+    "${API_BASE}/payments",
     headers={"X-Api-Key": key},
     json={"amount": 4500, "currency": "NGN", "order_id": "FOOTIE-1021"},
 )`,
@@ -359,9 +362,9 @@ def webhook():
         <Section id="verify" title="Verify a Payment">
           <p>Poll <InlineCode>GET /payments/:id</InlineCode> to double-check status before shipping.</p>
           <CodeBlock snippets={{
-            cURL: `curl http://localhost:3001/payments/0xabc123 \\
+            cURL: `curl ${API_BASE}/payments/0xabc123 \\
   -H "X-Api-Key: YOUR_KEY"`,
-            Node: `const payment = await fetch(\`/payments/\${paymentId}\`, {
+            Node: `const payment = await fetch(\`${API_BASE}/payments/\${paymentId}\`, {
   headers: { 'X-Api-Key': process.env.ARCPAY_KEY },
 }).then(r => r.json());
 
@@ -369,7 +372,7 @@ if (payment.status !== 'paid') {
   throw new Error('Do not ship — payment not confirmed');
 }`,
             Python: `p = requests.get(
-    f"http://localhost:3001/payments/{payment_id}",
+    f"${API_BASE}/payments/{payment_id}",
     headers={"X-Api-Key": key},
 ).json()
 assert p["status"] == "paid", "Do not ship"`,
@@ -382,7 +385,7 @@ assert p["status"] == "paid", "Do not ship"`,
           <CodeBlock snippets={{
             Node: `import ArcPay from './arcpay-sdk';  // or from '@arcpay/sdk' when published
 
-const arcpay = new ArcPay(process.env.ARCPAY_KEY, 'http://localhost:3001');
+const arcpay = new ArcPay(process.env.ARCPAY_KEY, '${API_BASE}');
 
 // Create a payment
 const payment = await arcpay.createPayment({ amount: 4500, currency: 'NGN' });
@@ -391,13 +394,15 @@ const payment = await arcpay.createPayment({ amount: 4500, currency: 'NGN' });
 await arcpay.checkout({ amount: 4500, currency: 'NGN', orderId: 'FOOTIE-1021' });`,
           }} />
 
-          <H3>Browser script tag</H3>
+          <H3>Browser script tag <span className="text-xs font-normal text-gray-400">(hosted CDN coming soon)</span></H3>
+          <p>A hosted, drop-in script is on the roadmap. Until then, integrate server-side with the Node example above — that keeps your API key off the browser, which is the recommended pattern anyway.</p>
           <CodeBlock snippets={{
-            cURL: `<script src="https://arcpay.io/sdk/v1/arcpay-sdk.js"></script>
+            cURL: `<!-- Preview of the planned drop-in widget -->
+<script src="${API_BASE}/sdk/v1/arcpay.js"></script>
 <script>
   const arcpay = new ArcPay({
-    apiKey:  'YOUR_KEY',           // move server-side in production
-    baseUrl: 'http://localhost:3001',
+    apiKey:  'YOUR_KEY',           // for production, create the payment server-side instead
+    baseUrl: '${API_BASE}',
   });
   arcpay.checkout({ amount: 4500, currency: 'NGN' });
 </script>`,
@@ -418,7 +423,7 @@ app.post('/checkout', async (req, res) => {
   const { productId, customerEmail } = req.body;
   const product = await db.products.findById(productId);
 
-  const payment = await fetch('http://localhost:3001/payments', {
+  const payment = await fetch('${API_BASE}/payments', {
     method: 'POST',
     headers: { 'X-Api-Key': process.env.ARCPAY_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({

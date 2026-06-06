@@ -40,6 +40,14 @@ function buildChart(payments: Payment[], days = 7) {
 
 function trunc(s: string, n = 10) { return s.slice(0, n) + "…"; }
 
+function fmtTime(isoStr: string) {
+  const d = new Date(isoStr.includes("T") ? isoStr : isoStr + " UTC");
+  const isToday = new Date().toDateString() === d.toDateString();
+  return isToday
+    ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " · " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 // ─── Tiny copy hook ───────────────────────────────────────────────────────────
 
 function useCopy() {
@@ -139,6 +147,124 @@ function CreateModal({ token, onClose }: { token: string; onClose: () => void })
               </div>
             </>
           )}
+        </CardBody>
+      </Card>
+    </div>
+  );
+}
+
+// ─── First-timer walkthrough ──────────────────────────────────────────────────
+
+interface GuideActions {
+  onProfile: () => void;
+  onWebhook: () => void;
+  onCreate:  () => void;
+  onApiKey:  () => void;
+}
+
+function WelcomeWalkthrough({
+  merchantName, hasWallet, hasWebhook, hasPayment, actions, onClose,
+}: {
+  merchantName: string;
+  hasWallet: boolean;
+  hasWebhook: boolean;
+  hasPayment: boolean;
+  actions: GuideActions;
+  onClose: () => void;
+}) {
+  const steps = [
+    {
+      icon: Sparkles,
+      title: `Welcome to ArcPay, ${merchantName}! 👋`,
+      body: "Accept dollar-stable USDC payments on Arc — funds settle straight to your own wallet in under a second. ArcPay never holds your money. Let's get you set up in four quick steps.",
+      action: null as null | { label: string; run: () => void },
+      done: false,
+    },
+    {
+      icon: Wallet,
+      title: "1 · Add your settlement wallet",
+      body: "This is the wallet where your USDC lands after every payment. Connect MetaMask or paste your address — it's non-custodial, so only you control the funds.",
+      action: { label: "Open profile settings", run: actions.onProfile },
+      done: hasWallet,
+    },
+    {
+      icon: Webhook,
+      title: "2 · Set your webhook URL",
+      body: "ArcPay sends a signed notification to your server the moment a payment confirms on-chain — so your app can ship the order automatically. Add the endpoint and send a test.",
+      action: { label: "Open webhook settings", run: actions.onWebhook },
+      done: hasWebhook,
+    },
+    {
+      icon: Link2,
+      title: "3 · Create your first payment",
+      body: "Generate a shareable payment link (or QR) for any amount in USDC or your local currency. Open it, pay with a test wallet, and watch it land in Recent payments.",
+      action: { label: "Create a payment link", run: actions.onCreate },
+      done: hasPayment,
+    },
+    {
+      icon: Key,
+      title: "4 · Grab your API key",
+      body: "Ready to integrate your own store? Your API key authenticates server-side requests. Keep it secret — never put it in browser code. Full guides live in the docs.",
+      action: { label: "View API key", run: actions.onApiKey },
+      done: false,
+    },
+  ];
+
+  const [i, setI] = useState(0);
+  const step = steps[i];
+  const isLast = i === steps.length - 1;
+  const Icon = step.icon;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <CardBody className="space-y-5 pt-6">
+          {/* progress dots */}
+          <div className="flex items-center justify-between">
+            <div className="flex gap-1.5">
+              {steps.map((_, idx) => (
+                <span key={idx}
+                  className={`h-1.5 rounded-full transition-all ${idx === i ? "w-6 bg-[#6c47ff]" : idx < i ? "w-1.5 bg-[#6c47ff]/40" : "w-1.5 bg-gray-200"}`} />
+              ))}
+            </div>
+            <button onClick={onClose} className="text-gray-300 hover:text-gray-500" title="Skip">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center text-center space-y-3 py-2">
+            <div className="w-14 h-14 rounded-2xl bg-[#6c47ff]/10 flex items-center justify-center">
+              <Icon className="w-7 h-7 text-[#6c47ff]" />
+            </div>
+            <h3 className="font-bold text-lg text-gray-900">{step.title}</h3>
+            {step.done && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+                <Check className="w-3.5 h-3.5" /> Already done
+              </span>
+            )}
+            <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+          </div>
+
+          {step.action && (
+            <Button variant="outline" className="w-full" onClick={() => { step.action!.run(); onClose(); }}>
+              {step.action.label} <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
+          )}
+
+          <div className="flex items-center gap-2">
+            {i > 0 && (
+              <Button variant="outline" className="px-4" onClick={() => setI(n => n - 1)}>
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            )}
+            {isLast ? (
+              <Button className="flex-1" onClick={onClose}>Start using ArcPay →</Button>
+            ) : (
+              <Button className="flex-1" onClick={() => setI(n => n + 1)}>
+                Next <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            )}
+          </div>
         </CardBody>
       </Card>
     </div>
@@ -688,6 +814,19 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [activeView,   setActiveView]   = useState<"home" | "payments" | "settings">("home");
   const [settingsTab,  setSettingsTab]  = useState<"profile" | "password" | "apikey" | "webhook" | "currency" | "snippet">("profile");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(true);
+
+  // First-timer walkthrough — auto-opens once per merchant, re-openable from the topbar
+  const guideKey = `arcpay_walkthrough_seen_${merchant.id}`;
+  const [showGuide, setShowGuide] = useState(() => localStorage.getItem(guideKey) !== "1");
+  function closeGuide() {
+    localStorage.setItem(guideKey, "1");
+    setShowGuide(false);
+  }
+  function openGuide() {
+    setActiveView("home");
+    setShowGuide(true);
+  }
 
   // Tick every second so "updated X ago" stays current
   const [now, setNow] = useState(() => Date.now());
@@ -1030,9 +1169,26 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               </button>
             ))}
           </div>
-          <p className="hidden lg:block text-sm font-semibold capitalize">{activeView === "home" ? "Dashboard" : activeView}</p>
+          <div className="hidden lg:flex items-center gap-2">
+            {activeView !== "home" && (
+              <button
+                onClick={() => setActiveView("home")}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#6c47ff] border border-gray-200 rounded-lg px-2.5 py-1.5 hover:border-[#6c47ff]/30 hover:bg-[#6c47ff]/5 transition-colors"
+                title="Back to dashboard">
+                <ArrowLeft className="w-3.5 h-3.5" /> Back
+              </button>
+            )}
+            <p className="text-sm font-semibold capitalize">{activeView === "home" ? "Dashboard" : activeView}</p>
+          </div>
 
           <div className="flex items-center gap-3">
+            {/* Setup guide — re-open the first-timer walkthrough anytime */}
+            <button
+              onClick={openGuide}
+              title="Open the setup guide"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#6c47ff] border border-[#6c47ff]/30 rounded-lg px-2.5 py-1.5 hover:bg-[#6c47ff]/5 transition-colors">
+              <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Setup guide</span>
+            </button>
             {/* Currency flag — click to go to currency settings */}
             <button
               onClick={() => openSetting("currency")}
@@ -1083,25 +1239,30 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               {!coreDone ? (
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <button className="flex items-center justify-between w-full" onClick={() => setChecklistOpen(o => !o)}>
                       <h3 className="font-semibold">Get started</h3>
-                      <span className="text-xs text-gray-400">{checklist.filter(c => c.done).length}/3</span>
-                    </div>
-                  </CardHeader>
-                  <CardBody className="space-y-2">
-                    {checklist.map((s, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${s.done ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
-                          {s.done ? <Check className="w-3.5 h-3.5" /> : i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${s.done ? "text-gray-400 line-through" : "text-gray-900"}`}>{s.title}</p>
-                          <p className="text-xs text-gray-400">{s.desc}</p>
-                        </div>
-                        {!s.done && s.cta && <Button size="sm" variant="outline" onClick={s.cta}>Do it</Button>}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{checklist.filter(c => c.done).length}/3</span>
+                        {checklistOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                       </div>
-                    ))}
-                  </CardBody>
+                    </button>
+                  </CardHeader>
+                  {checklistOpen && (
+                    <CardBody className="space-y-2">
+                      {checklist.map((s, i) => (
+                        <div key={i} className="flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${s.done ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                            {s.done ? <Check className="w-3.5 h-3.5" /> : i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium ${s.done ? "text-gray-400 line-through" : "text-gray-900"}`}>{s.title}</p>
+                            <p className="text-xs text-gray-400">{s.desc}</p>
+                          </div>
+                          {!s.done && s.cta && <Button size="sm" variant="outline" onClick={s.cta}>Do it</Button>}
+                        </div>
+                      ))}
+                    </CardBody>
+                  )}
                 </Card>
               ) : !bannerDismissed ? (
                 <div className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 flex items-center gap-2">
@@ -1199,6 +1360,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                         <div key={p.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
                           <StatusBadge status={p.status} />
                           <span className="font-mono text-xs text-gray-400">{trunc(p.id, 10)}</span>
+                          <span className="text-xs text-gray-300">{fmtTime(p.created_at)}</span>
                           <span className="ml-auto text-sm font-medium">{fmtUsdc(p.amount)}</span>
                           {localRate && <span className="text-xs text-gray-400 w-24 text-right">{localSym}{Math.round(p.amount / 1e6 * localRate).toLocaleString()}</span>}
                         </div>
@@ -1599,6 +1761,22 @@ window.location = payment_url;`}
       </a>
 
       {showModal && <CreateModal token={token} onClose={() => { setShowModal(false); refresh(); }} />}
+
+      {showGuide && (
+        <WelcomeWalkthrough
+          merchantName={merchant.name}
+          hasWallet={hasWallet}
+          hasWebhook={hasWebhook}
+          hasPayment={hasPayment}
+          actions={{
+            onProfile: () => openSetting("profile"),
+            onWebhook: () => openSetting("webhook"),
+            onCreate:  () => setShowModal(true),
+            onApiKey:  () => openSetting("apikey"),
+          }}
+          onClose={closeGuide}
+        />
+      )}
     </div>
   );
 }
