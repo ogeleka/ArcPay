@@ -36,7 +36,7 @@ SSH into your VPS as root or a sudo user, then:
 
 ```bash
 # Download and run the setup script
-curl -O https://raw.githubusercontent.com/YOUR_GITHUB/arcpay/main/scripts/setup-server.sh
+curl -O https://raw.githubusercontent.com/ogeleka/ArcPay/main/scripts/setup-server.sh
 bash setup-server.sh arcpay.yourdomain.com
 ```
 
@@ -49,7 +49,7 @@ It also runs certbot to issue your SSL certificate.
 
 ```bash
 cd /var/www
-git clone https://github.com/YOUR_GITHUB/arcpay.git arcpay
+git clone https://github.com/ogeleka/ArcPay.git arcpay
 cd arcpay
 ```
 
@@ -67,7 +67,9 @@ Fill in:
 APP_URL=https://arcpay.yourdomain.com
 ARC_TESTNET_RPC=https://rpc.testnet.arc.network
 ARC_USDC=0x3600000000000000000000000000000000000000
-ARCPAY_ADDRESS=0xA6fa26382E453b6BeE09BE730C0503c885Da51af
+ARCPAY_ADDRESS=0xF5f8e51425cA2240c4cBbEb964b0d1f480A7cDef
+PRIVATE_KEY=0xYOUR_DEPLOYER_PRIVATE_KEY
+JWT_SECRET=<run: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))">
 NGN_FALLBACK_RATE=1600
 ```
 
@@ -85,7 +87,7 @@ nano frontend/.env.production
 Fill in:
 ```
 VITE_API_URL=https://arcpay.yourdomain.com
-VITE_ARCPAY_ADDRESS=0xA6fa26382E453b6BeE09BE730C0503c885Da51af
+VITE_ARCPAY_ADDRESS=0xF5f8e51425cA2240c4cBbEb964b0d1f480A7cDef
 VITE_WALLETCONNECT_PROJECT_ID=67da330f38709c39af17bb92658b9e20
 ```
 
@@ -143,10 +145,10 @@ curl https://arcpay.yourdomain.com/health
 # NGN rate (via backend proxy — or hit :3002 directly on the server)
 curl https://arcpay.yourdomain.com/ngn/rate  # (if you uncommented the proxy block)
 
-# Create a merchant
-curl -X POST https://arcpay.yourdomain.com/merchants \
+# Test merchant registration
+curl -X POST https://arcpay.yourdomain.com/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Test","email":"test@example.com","wallet_address":"0xYOUR_WALLET"}'
+  -d '{"name":"Test","email":"test@example.com","password":"testpass123","wallet_address":"0xYOUR_WALLET"}'
 ```
 
 Open `https://arcpay.yourdomain.com` in a browser — the landing page should load over HTTPS with the padlock.
