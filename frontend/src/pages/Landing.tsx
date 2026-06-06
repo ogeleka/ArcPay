@@ -181,14 +181,14 @@ export default function Landing() {
             {/* Left */}
             <div className="flex-1 text-center lg:text-left">
               <p className="arc-kicker text-xs sm:text-sm font-medium mb-6">{"{ USDC PAYMENTS ON ARC }"}</p>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-white leading-[0.98] mb-6">
-                Accept USDC<br />
-                in seconds
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white leading-[0.98] mb-6">
+                Dollar-stable payments<br />
+                for Africa and the world.
               </h1>
               <p className="text-lg sm:text-xl text-blue-100/80 leading-relaxed mb-9 max-w-lg mx-auto lg:mx-0">
-                Drop in 3 lines of code. Dollar-stable fees, sub-second
-                settlement, and funds that go straight to your wallet —
-                real-world payments, built onchain.
+                Settlement in under a second. No FX risk. No gateway holding your money.
+                Accept USDC natively — in naira, cedis, rand, shillings, or straight dollars.
+                Your currency, your choice.
               </p>
               <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start">
                 <Link to="/dashboard"
