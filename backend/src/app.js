@@ -72,8 +72,8 @@ app.get("/api/pay/:id", (req, res) => {
   });
 });
 
-// Serve checkout SPA for all /pay/* routes
-app.get("/pay/*", (_, res) =>
+// Serve checkout SPA for all /pay/* and /checkout/* routes
+app.get(["/pay/*", "/checkout/*"], (_, res) =>
   res.sendFile(path.join(__dirname, "..", "public", "checkout.html"))
 );
 
