@@ -60,7 +60,7 @@ FINAL*.md
 .claude/
 
 # ── Legacy HTML (superseded by React frontend) ────────────────────────────────
-backend/public/
+# backend/public/ — tracked so VPS has checkout.html and dashboard.html
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 .nyc_output/

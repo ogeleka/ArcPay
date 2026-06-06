@@ -8,6 +8,9 @@ const { getRateForCurrency, CURRENCIES } = require("./fx");
 
 const app = express();
 
+// Trust nginx reverse proxy
+app.set("trust proxy", 1);
+
 // Security headers
 app.use(helmet({ contentSecurityPolicy: false })); // CSP disabled — checkout page loads external scripts
 
