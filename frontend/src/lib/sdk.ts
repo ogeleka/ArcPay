@@ -66,17 +66,36 @@ export class ArcPay {
   }
 }
 
-/** Verify an incoming ArcPay webhook signature (Node.js / server-side only). */
-export function verifyWebhook(
-  rawBody: string | Buffer,
+/**
+ * Verify an incoming ArcPay webhook signature.
+ * Node.js (server-side): pass rawBody as string or Uint8Array.
+ * Returns a promise — use `await verifyWebhook(...)`.
+ */
+export async function verifyWebhook(
+  rawBody: string | Uint8Array,
   signatureHeader: string,
   secret: string,
-): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const crypto = require("crypto") as typeof import("crypto");
-  const expected =
-    "sha256=" + crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signatureHeader));
+): Promise<boolean> {
+  const enc      = new TextEncoder();
+  const keyBytes  = enc.encode(secret);
+  const bodyBytes = typeof rawBody === "string" ? enc.encode(rawBody) : rawBody;
+
+  const key = await crypto.subtle.importKey(
+    "raw", keyBytes as unknown as ArrayBuffer,
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, bodyBytes as unknown as ArrayBuffer);
+  const hexSig  = Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, "0")).join("");
+  const expected = "sha256=" + hexSig;
+
+  // Constant-time comparison
+  if (expected.length !== signatureHeader.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ signatureHeader.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 export default ArcPay;
