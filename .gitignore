@@ -1,32 +1,32 @@
-# ── Dependencies ──────────────────────────────────────────────────────────────
+# deps
 node_modules/
 
-# ── Environment variables ──────────────────────────────────────────────────────
+# env / secrets
 .env
 .env.local
 .env.*.local
 *.local
 
-# ── Build outputs ─────────────────────────────────────────────────────────────
+# build output
 dist/
 build/
 out/
 
-# ── Hardhat / Solidity ────────────────────────────────────────────────────────
+# hardhat / solidity
 artifacts/
 cache/
 coverage/
 coverage.json
 typechain-types/
 
-# ── Database ──────────────────────────────────────────────────────────────────
+# sqlite
 *.db
 *.db-shm
 *.db-wal
 *.sqlite
 *.sqlite3
 
-# ── Logs ──────────────────────────────────────────────────────────────────────
+# logs
 logs/
 *.log
 npm-debug.log*
@@ -36,33 +36,34 @@ yarn-error.log*
 pm2-error*.log
 pm2-out*.log
 
-# ── OS ────────────────────────────────────────────────────────────────────────
+# os junk
 .DS_Store
 .DS_Store?
 Thumbs.db
 ehthumbs.db
 
-# ── Editor ────────────────────────────────────────────────────────────────────
+# editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# ── Internal planning docs ────────────────────────────────────────────────────
+# planning notes, keep these out of the repo
 TRACKER.md
 TRACKER2.md
 TRACKER3.md
 PITCH.md
 FINAL*.md
+security_tracker.md
 
-# ── Tool config ───────────────────────────────────────────────────────────────
+# tooling
 .claude/
 
-# ── Legacy HTML (superseded by React frontend) ────────────────────────────────
+# old html dashboard, replaced by the react app
 backend/public/
 
-# ── Misc ──────────────────────────────────────────────────────────────────────
+# misc
 .nyc_output/
 *.tgz
 *.tar.gz

@@ -43,7 +43,7 @@ function applyExpiry(row) {
   return row;
 }
 
-// ── POST /payments ─────────────────────────────────────────────────────────
+// POST /payments
 // Body: { amount, currency?, order_id?, customer_email?, callback_url?, metadata? }
 //   currency omitted or "USDC" → amount is USDC micro-units (1 USDC = 1 000 000)
 //   currency "NGN" (or any supported fiat) → amount is whole local units
@@ -151,7 +151,7 @@ router.post("/", requireApiKey, async (req, res, next) => {
   }
 });
 
-// ── GET /payments ──────────────────────────────────────────────────────────
+// GET /payments
 // Query params:
 //   status  = paid|pending|expired|refunded|released|all  (default: all)
 //   page    = 1-based page number  (default: 1)
@@ -207,7 +207,7 @@ router.get("/", requireApiKey, (req, res) => {
   });
 });
 
-// ── GET /payments/:id ──────────────────────────────────────────────────────
+// GET /payments/:id
 router.get("/:id", requireApiKey, (req, res) => {
   const row = db.prepare(
     `SELECT p.id, p.amount, p.currency, p.amount_ngn, p.rate, p.markup_bps,

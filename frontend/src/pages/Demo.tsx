@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 
 const STORE_URL = import.meta.env.VITE_STORE_URL ?? "http://localhost:3100";
 
-// ─── Arc testnet params (for MetaMask add-chain) ─────────────────────────────
+// Arc testnet params (for MetaMask add-chain)
 const ARC_TESTNET = {
-  chainId:         "0x4CE892",        // 5042002 in hex
+  chainId:         "0x4CEF52",        // 5042002 in hex
   chainName:       "Arc Testnet",
   nativeCurrency:  { name: "USD Coin", symbol: "USDC", decimals: 6 },
   rpcUrls:         ["https://rpc.testnet.arc.network"],
@@ -16,7 +16,7 @@ const ARC_TESTNET = {
 
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
 
-// ─── Tiny copy helper ─────────────────────────────────────────────────────────
+// Tiny copy helper
 function CopyLine({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
   function copy() {
@@ -37,7 +37,7 @@ function CopyLine({ label, value }: { label: string; value: string }) {
   );
 }
 
-// ─── Collapsible step ─────────────────────────────────────────────────────────
+// Collapsible step
 function Step({
   n, title, subtitle, done, children,
 }: {
@@ -70,7 +70,7 @@ function Step({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// Main page
 export default function Demo() {
   const [metamaskAdded, setMetamaskAdded] = useState(false);
   const [usdcAdded,     setUsdcAdded]     = useState(false);

@@ -1,6 +1,6 @@
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 export type PaymentStatus = "pending" | "paid" | "released" | "refunded" | "expired";
 
@@ -64,7 +64,7 @@ export interface PaymentList {
   has_more: boolean;
 }
 
-// ── HTTP helpers ──────────────────────────────────────────────────────────────
+// HTTP helpers
 
 function authHeader(token: string) {
   return { "Authorization": `Bearer ${token}` };
@@ -107,7 +107,7 @@ async function apiPatch<T>(path: string, body: unknown, token?: string): Promise
   return data as T;
 }
 
-// ── Auth (no token needed) ────────────────────────────────────────────────────
+// Auth (no token needed)
 
 export const register = (body: {
   name: string;
@@ -128,7 +128,7 @@ export const register = (body: {
 export const login = (email: string, password: string) =>
   apiPost<{ token: string }>("/auth/login", { email, password });
 
-// ── Wallet sign-in (SIWE-style) ───────────────────────────────────────────────
+// Wallet sign-in (SIWE-style)
 
 export const walletNonce = (address: string) =>
   apiPost<{ nonce: string; message: string }>("/auth/wallet/nonce", { address });
@@ -136,12 +136,12 @@ export const walletNonce = (address: string) =>
 export const walletLogin = (address: string, signature: string) =>
   apiPost<{ token: string }>("/auth/wallet/login", { address, signature });
 
-// ── Public ────────────────────────────────────────────────────────────────────
+// Public
 
 export const getPayment = (id: string) =>
   apiGet<PaymentDetails>(`/api/pay/${id}`);
 
-// ── Authenticated (JWT token required) ───────────────────────────────────────
+// Authenticated (JWT token required)
 
 export const getMe = (token: string) =>
   apiGet<MerchantProfile>("/merchants/me", token);

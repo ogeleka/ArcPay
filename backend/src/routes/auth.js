@@ -32,7 +32,7 @@ function signToken(merchantId) {
   return jwt.sign({ merchantId }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
 }
 
-// ── POST /auth/register ────────────────────────────────────────────────────
+// POST /auth/register
 const SUPPORTED_CURRENCIES = new Set(["NGN", "GHS", "ZAR", "KES", "USD", "USDC"]);
 
 router.post("/register", async (req, res, next) => {
@@ -109,7 +109,7 @@ router.post("/register", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// ── POST /auth/login ───────────────────────────────────────────────────────
+// POST /auth/login
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -132,7 +132,7 @@ router.post("/login", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// ── POST /auth/wallet/nonce ─────────────────────────────────────────────────
+// POST /auth/wallet/nonce
 // Step 1 of wallet sign-in: client requests a nonce to sign.
 router.post("/wallet/nonce", (req, res) => {
   const { address } = req.body;
@@ -146,7 +146,7 @@ router.post("/wallet/nonce", (req, res) => {
   res.json({ nonce, message: buildSignMessage(address, nonce) });
 });
 
-// ── POST /auth/wallet/login ─────────────────────────────────────────────────
+// POST /auth/wallet/login
 // Step 2: client sends the signature; we verify it and issue a JWT.
 router.post("/wallet/login", (req, res, next) => {
   try {
@@ -189,7 +189,7 @@ router.post("/wallet/login", (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// ── POST /auth/change-password ─────────────────────────────────────────────
+// POST /auth/change-password
 // Requires current password — no silent resets.
 router.post("/change-password", async (req, res, next) => {
   try {

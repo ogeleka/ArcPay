@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Check, Zap, Shield, DollarSign, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ─── Animated checkout demo ───────────────────────────────────────────────────
+// Animated checkout demo
 
 const DEMO_STEPS = [
   {
@@ -114,7 +114,7 @@ function AnimatedDemo() {
   );
 }
 
-// ─── Copy button ──────────────────────────────────────────────────────────────
+// Copy button
 
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -130,7 +130,7 @@ function CopyBtn({ text }: { text: string }) {
   );
 }
 
-// ─── Supported markets ────────────────────────────────────────────────────────
+// Supported markets
 
 const COUNTRIES = [
   { flag: "🇳🇬", country: "Nigeria",      code: "NGN", symbol: "₦",   currency: "Naira" },
@@ -157,7 +157,7 @@ function useLiveRates(): RateMap {
   return rates;
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// Main page
 
 const SDK_SNIPPET = `// 3 lines — that's the whole integration
 const { payment_id } = await arcpay.createPayment({
@@ -170,7 +170,7 @@ export default function Landing() {
   return (
     <div className="bg-white">
 
-      {/* ── Hero (Arc theme) ── */}
+      {/* Hero (Arc theme) */}
       <section className="relative arc-hero overflow-hidden">
         {/* faint Arc curve graphics */}
         <div className="arc-curve absolute -right-[20%] top-[-30%] w-[750px] h-[750px] pointer-events-none" />
@@ -220,7 +220,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Stats bar ── */}
+      {/* Stats bar */}
       <div className="border-y border-gray-100 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
           {[
@@ -238,7 +238,7 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* ── Why Arc ── */}
+      {/* Why Arc */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
@@ -277,7 +277,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Supported markets (live rates) ── */}
+      {/* Supported markets (live rates) */}
       <section className="bg-gray-50 py-20 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
@@ -327,7 +327,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How it works ── */}
+      {/* How it works */}
       <section className="bg-white py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">How it works</h2>
@@ -350,7 +350,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 3-line snippet ── */}
+      {/* 3-line snippet */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-20">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">3 lines of code</h2>
@@ -389,7 +389,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Nigeria angle ── */}
+      {/* Nigeria angle */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-20">
         <div className="arc-panel rounded-3xl text-white p-10 sm:p-14 text-center overflow-hidden relative">
           <p className="arc-kicker text-xs font-medium mb-5">{"{ BUILT FOR AFRICA }"}</p>
@@ -416,7 +416,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Try the demo ── */}
+      {/* Try the demo */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
         <div className="rounded-3xl border border-gray-100 bg-white shadow-sm p-8 sm:p-12">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -454,7 +454,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <footer className="border-t border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">

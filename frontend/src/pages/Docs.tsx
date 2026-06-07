@@ -4,7 +4,7 @@ import { Check, Copy } from "lucide-react";
 // Base URL of this deployment — examples always match where the docs are served from
 const API_BASE = typeof window !== "undefined" ? window.location.origin : "https://arc.ogsnap.online";
 
-// ─── Code block with language tabs + copy ────────────────────────────────────
+// Code block with language tabs + copy
 
 type Lang = "cURL" | "Node" | "Python";
 
@@ -41,7 +41,7 @@ function CodeBlock({ snippets }: { snippets: Partial<Record<Lang, string>> }) {
   );
 }
 
-// ─── Nav sections ─────────────────────────────────────────────────────────────
+// Nav sections
 
 const NAV = [
   { id: "quickstart",      label: "Quick Start" },
@@ -73,7 +73,7 @@ function InlineCode({ children }: { children: React.ReactNode }) {
   return <code className="bg-gray-100 rounded px-1.5 py-0.5 text-xs font-mono text-[#6c47ff]">{children}</code>;
 }
 
-// ─── Docs page ────────────────────────────────────────────────────────────────
+// Docs page
 
 export default function Docs() {
   const [active, setActive] = useState("quickstart");
@@ -93,7 +93,7 @@ export default function Docs() {
 
   return (
     <>
-      {/* ── Header band — Arc theme ── */}
+      {/* Header band - Arc theme */}
       <div className="arc-panel">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <p className="arc-kicker text-xs font-medium mb-3">{"{ DEVELOPER DOCS }"}</p>
@@ -107,7 +107,7 @@ export default function Docs() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex gap-10">
 
-      {/* ── Left nav ── */}
+      {/* Left nav */}
       <aside className="hidden lg:block w-52 shrink-0">
         <div className="sticky top-24 space-y-1">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">On this page</p>
@@ -125,7 +125,7 @@ export default function Docs() {
         </div>
       </aside>
 
-      {/* ── Content ── */}
+      {/* Content */}
       <div ref={contentRef} className="flex-1 min-w-0">
 
         {/* Quick Start */}

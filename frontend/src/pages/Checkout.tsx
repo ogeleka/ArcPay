@@ -15,17 +15,17 @@ import { fmtUsdc, fmtNgn, secondsUntil } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// Types
 
 type Step = "idle" | "wrong-network" | "checking" | "creating" | "approving" | "paying" | "settled" | "failed";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 
 function fmt(s: number) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// Sub-components
 
 function StepRow({ label, state }: { label: string; state: "done" | "active" | "idle" }) {
   return (
@@ -87,7 +87,7 @@ function SettledCard({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// Main page
 
 export default function Checkout() {
   const { paymentId } = useParams<{ paymentId: string }>();
@@ -113,13 +113,13 @@ export default function Checkout() {
 
   const onRightNetwork = chainId === arcTestnet.id;
 
-  // ── Load payment ────────────────────────────────────────────────────────────
+  // Load payment
   useEffect(() => {
     if (!paymentId) return;
     getPayment(paymentId).then(setPayment).catch((e: Error) => setLoadErr(e.message));
   }, [paymentId]);
 
-  // ── Expiry countdown ────────────────────────────────────────────────────────
+  // Expiry countdown
   useEffect(() => {
     if (!payment?.expires_at) return;
     const tick = () => setTimeLeft(secondsUntil(payment.expires_at));
@@ -128,7 +128,7 @@ export default function Checkout() {
     return () => clearInterval(id);
   }, [payment?.expires_at]);
 
-  // ── On-chain payment state ──────────────────────────────────────────────────
+  // On-chain payment state
   const { refetch: refetchOnChain } = useReadContract({
     address: payment?.arcpay_address as `0x${string}`,
     abi: ARCPAY_ABI,
@@ -137,7 +137,7 @@ export default function Checkout() {
     query: { enabled: !!payment && isConnected && onRightNetwork },
   });
 
-  // ── USDC allowance ─────────────────────────────────────────────────────────
+  // USDC allowance
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: USDC_ADDRESS,
     abi: USDC_ABI,
@@ -146,7 +146,7 @@ export default function Checkout() {
     query: { enabled: !!address && !!payment && isConnected && onRightNetwork },
   });
 
-  // ── Wait for submitted tx ───────────────────────────────────────────────────
+  // Wait for submitted tx
   const { isSuccess: txConfirmed, isError: txFailed } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function Checkout() {
     }
   }, [txFailed]);
 
-  // ── Main flow ───────────────────────────────────────────────────────────────
+  // Main flow
   const runPay = useCallback(async () => {
     if (!payment) return;
     setStep("paying"); setErrMsg(null);
@@ -239,7 +239,7 @@ export default function Checkout() {
     await runApprove();
   }, [payment, refetchOnChain, runApprove]);
 
-  // ── Derived UI state ────────────────────────────────────────────────────────
+  // Derived UI state
   const isExpired = payment?.status === "expired" || timeLeft === 0 && !!payment?.expires_at;
   const isAlreadyPaid = payment?.status === "paid" || payment?.status === "released";
   const explorerUrl = arcTestnet.blockExplorers.default.url;
@@ -254,7 +254,7 @@ export default function Checkout() {
     return "idle";
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // Render
   if (loadErr) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center p-4">
@@ -278,7 +278,7 @@ export default function Checkout() {
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-4xl flex flex-col lg:flex-row gap-6 items-start justify-center">
 
-        {/* ── Main card ── */}
+        {/* Main card */}
         <Card className="w-full max-w-sm mx-auto lg:mx-0 shadow-lg">
           <CardBody className="space-y-5">
 
@@ -446,7 +446,7 @@ export default function Checkout() {
           </CardBody>
         </Card>
 
-        {/* ── QR panel (desktop) ── */}
+        {/* QR panel (desktop) */}
         <div className="hidden lg:flex flex-col items-center gap-3 pt-4">
           <div className="rounded-2xl bg-white shadow-sm p-5">
             <QRCode value={window.location.href} size={160} />

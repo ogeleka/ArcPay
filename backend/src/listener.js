@@ -84,7 +84,7 @@ function startListener() {
     return;
   }
 
-  // ── Direct state checker ─────────────────────────────────────────────────
+  // Direct state checker
   // Polls contract.payments(id) for every DB-pending payment.
   // Catches events the log scanner missed due to RPC timeouts.
   async function checkPending() {
@@ -120,7 +120,7 @@ function startListener() {
     setTimeout(checkPending, 10_000);
   }
 
-  // ── Event log scanner ────────────────────────────────────────────────────
+  // Event log scanner
   // Scans block ranges for contract events. Secondary to the state checker
   // but provides tx_hash + block_number for the transaction record.
   async function tryStart() {

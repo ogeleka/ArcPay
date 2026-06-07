@@ -22,7 +22,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { StatsSkeleton, TableSkeleton } from "@/components/ui/skeleton";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 function buildChart(payments: Payment[], days = 7) {
   const map: Record<string, number> = {};
@@ -48,7 +48,7 @@ function fmtTime(isoStr: string) {
     : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " · " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
-// ─── Tiny copy hook ───────────────────────────────────────────────────────────
+// Tiny copy hook
 
 function useCopy() {
   const [copied, setCopied] = useState(false);
@@ -60,7 +60,7 @@ function useCopy() {
   return { copied, copy };
 }
 
-// ─── Create-payment modal ─────────────────────────────────────────────────────
+// Create-payment modal
 
 function CreateModal({ token, onClose }: { token: string; onClose: () => void }) {
   const [amount,   setAmount]   = useState("");
@@ -153,7 +153,7 @@ function CreateModal({ token, onClose }: { token: string; onClose: () => void })
   );
 }
 
-// ─── First-timer walkthrough ──────────────────────────────────────────────────
+// First-timer walkthrough
 
 interface GuideActions {
   onProfile: () => void;
@@ -271,7 +271,7 @@ function WelcomeWalkthrough({
   );
 }
 
-// ─── Auth view ────────────────────────────────────────────────────────────────
+// Auth view
 
 type AuthMode = "signin" | "register";
 
@@ -460,7 +460,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
         </div>
 
         <Card>
-          {/* ─── SIGN IN ─── */}
+          {/* sign in */}
           {mode === "signin" && (
             <CardBody className="space-y-4 pt-6">
               <div>
@@ -524,7 +524,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
             </CardBody>
           )}
 
-          {/* ─── REGISTER WIZARD ─── */}
+          {/* register wizard */}
           {mode === "register" && !regResult && (
             <>
               {/* progress header */}
@@ -553,7 +553,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                   </div>
                 )}
 
-                {/* ── STEP 1 · Who you are ── */}
+                {/* STEP 1 - Who you are */}
                 {step === 1 && (
                   <>
                     <div>
@@ -601,7 +601,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                   </>
                 )}
 
-                {/* ── STEP 2 · Set up payments ── */}
+                {/* STEP 2 - Set up payments */}
                 {step === 2 && (
                   <>
                     <div>
@@ -706,7 +706,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
             </>
           )}
 
-          {/* ─── REGISTER SUCCESS — credentials shown once ─── */}
+          {/* REGISTER SUCCESS - credentials shown once */}
           {mode === "register" && regResult && (
             <CardBody className="space-y-4 pt-6">
               <div className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3">
@@ -743,7 +743,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
   );
 }
 
-// ─── Dashboard view ───────────────────────────────────────────────────────────
+// Dashboard view
 
 function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   token: string;
@@ -844,7 +844,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [search,     setSearch]     = useState("");
   const [exporting,  setExporting]  = useState(false);
 
-  // ── Data fetching ──────────────────────────────────────────────────────────
+  // Data fetching
   const refresh = useCallback(async (sf = statusFilter, pg = page, q = search) => {
     const [m, ps] = await Promise.all([getMe(token), listPayments(token, sf, pg, 25, q)]);
     setMerchant(m);
@@ -880,7 +880,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  // ── Webhook actions ────────────────────────────────────────────────────────
+  // Webhook actions
   async function saveWebhook() {
     setWebhookSaving(true); setWebhookMsg(null);
     try {
@@ -1006,7 +1006,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     setBannerDismissed(true);
   }
 
-  // ── Chart data ─────────────────────────────────────────────────────────────
+  // Chart data
   const payments  = paymentList.data;
   const chartData = buildChart(payments);
   const todayKey  = new Date().toISOString().slice(0, 10);
@@ -1014,7 +1014,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     .filter(p => p.created_at.slice(0, 10) === todayKey && (p.status === "paid" || p.status === "released"))
     .reduce((s, p) => s + p.amount / 1e6, 0);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // Render
   const NAV = [
     { id: "home",     label: "Dashboard", icon: LayoutDashboard },
     { id: "payments", label: "Payments",  icon: Receipt },
@@ -1087,7 +1087,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] flex">
-      {/* ─── Sidebar — Arc navy theme ─── */}
+      {/* Sidebar - Arc navy theme */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 arc-sidebar sticky top-0 h-screen text-blue-100">
         <div className="px-5 py-5 flex items-center gap-2 border-b border-white/10">
           <span className="text-xl">⚡</span>
@@ -1156,7 +1156,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
         </div>
       </aside>
 
-      {/* ─── Main column ─── */}
+      {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar (B1) — balance always visible */}
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-10">
@@ -1232,7 +1232,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               </div>
             </div>
 
-            {/* ════════ HOME ════════ */}
+            {/* home */}
             <div className={activeView === "home" ? "space-y-6" : "hidden"}>
 
               {/* Get started checklist (A3) */}
@@ -1371,7 +1371,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               </Card>
             </div>
 
-            {/* ════════ PAYMENTS (B4) ════════ */}
+            {/* payments */}
             <div className={activeView === "payments" ? "space-y-4" : "hidden"}>
               <Card>
                 <CardHeader>
@@ -1487,10 +1487,10 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               </Card>
             </div>
 
-            {/* ════════ SETTINGS ════════ */}
+            {/* settings */}
             <div className={activeView === "settings" ? "space-y-5 max-w-xl" : "hidden"}>
 
-              {/* ── Header — chosen from the sidebar dropdown ── */}
+              {/* Header - chosen from the sidebar dropdown */}
               <div>
                 <h2 className="text-lg font-bold text-gray-900">{settingsLabel}</h2>
                 <p className="text-xs text-gray-400 mt-0.5">Pick another option from <span className="font-medium text-gray-500">Settings</span> in the sidebar.</p>
@@ -1507,7 +1507,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 ))}
               </div>
 
-              {/* ── Profile ── */}
+              {/* Profile */}
               {settingsTab === "profile" && (
                 <Card>
                   <CardHeader><div className="flex items-center gap-2"><User className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Profile</h3></div></CardHeader>
@@ -1554,7 +1554,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 </Card>
               )}
 
-              {/* ── Password ── */}
+              {/* Password */}
               {settingsTab === "password" && (
                 <Card>
                   <CardHeader><div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Change password</h3></div></CardHeader>
@@ -1595,7 +1595,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 </Card>
               )}
 
-              {/* ── API Key ── */}
+              {/* API Key */}
               {settingsTab === "apikey" && (
                 <Card>
                   <CardHeader><div className="flex items-center gap-2"><Key className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">API Key</h3></div></CardHeader>
@@ -1643,7 +1643,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 </Card>
               )}
 
-              {/* ── Webhook ── */}
+              {/* Webhook */}
               {settingsTab === "webhook" && (
                 <Card>
                   <CardHeader><div className="flex items-center gap-2"><Webhook className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Webhook</h3></div></CardHeader>
@@ -1686,7 +1686,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 </Card>
               )}
 
-              {/* ── Currency & Markup ── */}
+              {/* Currency & Markup */}
               {settingsTab === "currency" && (
                 <Card>
                   <CardHeader><div className="flex items-center gap-2"><span className="text-gray-400 text-sm font-bold">%</span><h3 className="font-semibold text-sm">Currency &amp; FX markup</h3></div></CardHeader>
@@ -1728,7 +1728,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                 </Card>
               )}
 
-              {/* ── Integration snippet ── */}
+              {/* Integration snippet */}
               {settingsTab === "snippet" && (
                 <Card>
                   <CardHeader><h3 className="font-semibold text-sm">Integration snippet</h3></CardHeader>
@@ -1781,7 +1781,7 @@ window.location = payment_url;`}
   );
 }
 
-// ─── Page root ─────────────────────────────────────────────────────────────────
+// Page root
 
 export default function Dashboard() {
   const [token,    setToken]    = useState<string | null>(() => localStorage.getItem("arcpay_token"));
