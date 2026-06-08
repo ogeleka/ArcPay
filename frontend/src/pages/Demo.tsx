@@ -9,7 +9,10 @@ const STORE_URL = import.meta.env.VITE_STORE_URL ?? "http://localhost:3100";
 const ARC_TESTNET = {
   chainId:         "0x4CEF52",        // 5042002 in hex
   chainName:       "Arc Testnet",
-  nativeCurrency:  { name: "USD Coin", symbol: "USDC", decimals: 6 },
+  // Arc's native token is really 6-decimal USDC, but wallets only accept 18 in the
+  // add-network call, so we send 18 here. Doesn't affect payments — those use the
+  // USDC ERC-20 token, which carries its own decimals.
+  nativeCurrency:  { name: "USD Coin", symbol: "USDC", decimals: 18 },
   rpcUrls:         ["https://rpc.testnet.arc.network"],
   blockExplorerUrls: ["https://testnet.arcscan.app"],
 };
