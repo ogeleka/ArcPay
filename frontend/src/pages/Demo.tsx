@@ -185,16 +185,16 @@ export default function Demo() {
         {/* Step 3 — Get test USDC */}
         <Step n={3} title="Get test USDC" subtitle="You'll need a small amount to pay with">
           <p className="text-sm text-gray-500">
-            Arc testnet USDC is free — it's only for testing. Claim some from the Arc faucet.
+            Arc testnet USDC is free — it's only for testing. Claim some from the Circle faucet.
           </p>
           <div className="flex flex-wrap gap-2">
             <a
-              href="https://faucet.arc.network"
+              href="https://faucet.circle.com/"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-[#6c47ff] text-white text-sm font-semibold px-5 py-2.5 hover:opacity-90"
             >
-              Open Arc Faucet <ExternalLink className="w-3.5 h-3.5" />
+              Open Circle Faucet <ExternalLink className="w-3.5 h-3.5" />
             </a>
             {hasMetamask && (
               <button
@@ -208,9 +208,9 @@ export default function Demo() {
           <div className="rounded-xl bg-blue-50 border border-blue-100 px-3 py-2.5 text-xs text-blue-700 space-y-1">
             <p className="font-semibold">Quick guide:</p>
             <ol className="list-decimal list-inside space-y-0.5 text-blue-600">
-              <li>Open the faucet and connect your MetaMask wallet</li>
-              <li>Request testnet USDC — usually 10–100 USDC</li>
-              <li>Wait ~10 seconds for it to arrive</li>
+              <li>Open the faucet and paste your wallet address</li>
+              <li>Pick <strong>Arc</strong> as the network and request USDC</li>
+              <li>Wait a few seconds for it to arrive</li>
             </ol>
           </div>
           <div className="space-y-1">
