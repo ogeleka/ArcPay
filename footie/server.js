@@ -216,6 +216,10 @@ function shell(title, body, opts = {}) {
                    font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; color:#1a1a1a; }
     .modal-close:hover { background:#e0d9cf; }
     .modal-frame { flex:1; border:none; width:100%; }
+    .modal-loading { flex:1; display:none; flex-direction:column; align-items:center;
+                     justify-content:center; gap:1rem; color:#888; font-size:.9rem; }
+    .spinner-lg { width:2.4rem; height:2.4rem; border:3px solid #eee; border-top-color:#6c47ff;
+                  border-radius:50%; animation:spin .8s linear infinite; }
     .modal-success { flex:1; display:none; flex-direction:column; align-items:center;
                      justify-content:center; text-align:center; gap:.75rem; padding:2rem; }
     .modal-success h2 { font-size:1.4rem; }
@@ -362,6 +366,10 @@ app.get(BASE, (req, res) => {
           <span id="modal-title">Secure checkout</span>
           <button class="modal-close" onclick="closePayModal()">✕ Cancel</button>
         </div>
+        <div id="pay-loading" class="modal-loading">
+          <div class="spinner-lg"></div>
+          <p>Setting up your secure checkout…</p>
+        </div>
         <iframe id="pay-frame" class="modal-frame" src="about:blank" allow="clipboard-write; payment"></iframe>
         <div id="pay-success" class="modal-success">
           <div style="font-size:3.2rem">🎉</div>
@@ -455,18 +463,28 @@ app.get(BASE, (req, res) => {
       }
 
       // opening/closing the checkout popup
+      // pop the modal up right away with a spinner — feels instant even while
+      // the payment is being created and the checkout iframe loads
+      function openModalLoading() {
+        document.getElementById('pay-success').style.display = 'none';
+        document.getElementById('pay-frame').style.display   = 'none';
+        document.getElementById('pay-loading').style.display = 'flex';
+        document.getElementById('modal-title').textContent   = 'Secure checkout';
+        document.getElementById('resume-bar').style.display  = 'none';
+        document.getElementById('pay-modal').style.display   = 'flex';
+      }
+
       function showCheckout(orderId, url) {
         activeOrder = orderId;
-        document.getElementById('pay-success').style.display = 'none';
         var frame = document.getElementById('pay-frame');
-        frame.style.display = 'block';
+        var load  = document.getElementById('pay-loading');
+        // keep the spinner up until the checkout page itself has loaded
+        frame.onload = function() { load.style.display = 'none'; frame.style.display = 'block'; };
         frame.src = url;
-        document.getElementById('modal-title').textContent = 'Secure checkout';
-        document.getElementById('pay-modal').style.display = 'flex';
-        document.getElementById('resume-bar').style.display = 'none';
       }
 
       function openPay(productId) {
+        openModalLoading();                       // instant feedback on click
         var body = 'product_id=' + encodeURIComponent(productId);
         fetch('${BASE}/buy?json=1', {
           method: 'POST',
@@ -475,16 +493,17 @@ app.get(BASE, (req, res) => {
         })
           .then(function(r) { return r.json(); })
           .then(function(d) {
-            if (!d.payment_url) { alert(d.error || 'Could not start payment.'); return; }
+            if (!d.payment_url) { closePayModal(); alert(d.error || 'Could not start payment.'); return; }
             pendingPay = { order_id: d.order_id, payment_url: d.payment_url };
             showCheckout(d.order_id, d.payment_url);
           })
-          .catch(function() { alert('Could not reach the store server.'); });
+          .catch(function() { closePayModal(); alert('Could not reach the store server.'); });
       }
 
       // they bailed before paying. let them pick it back up
       function reopenPay() {
         if (!pendingPay) return;
+        openModalLoading();
         showCheckout(pendingPay.order_id, pendingPay.payment_url);
       }
 
@@ -507,6 +526,7 @@ app.get(BASE, (req, res) => {
 
       function closePayModal() {
         document.getElementById('pay-modal').style.display = 'none';
+        document.getElementById('pay-loading').style.display = 'none';
         document.getElementById('pay-frame').src = 'about:blank';
         activeOrder = null;
         // didn't pay yet? leave them a way back
