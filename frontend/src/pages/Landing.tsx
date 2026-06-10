@@ -190,6 +190,10 @@ export default function Landing() {
                 Accept USDC natively — in naira, cedis, rand, shillings, or straight dollars.
                 Your currency, your choice.
               </p>
+              {/* phone mockup — shown here on mobile, in the right column on desktop */}
+              <div className="lg:hidden flex justify-center mb-9">
+                <AnimatedDemo />
+              </div>
               <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start">
                 <Link to="/dashboard"
                   className="rounded-xl bg-[#c7c2f7] text-[#0a1734] font-semibold px-6 h-12 inline-flex items-center hover:bg-white transition-colors">
@@ -212,8 +216,8 @@ export default function Landing() {
                 <span>· more soon</span>
               </div>
             </div>
-            {/* Right — animated demo */}
-            <div className="shrink-0">
+            {/* Right — animated demo (desktop only; on mobile it sits above the buttons) */}
+            <div className="shrink-0 hidden lg:block">
               <AnimatedDemo />
             </div>
           </div>
