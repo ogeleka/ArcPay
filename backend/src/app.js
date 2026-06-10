@@ -106,4 +106,11 @@ app.use((err, req, res, next) => {
   res.status(err.status ?? 500).json({ error: "Internal server error" });
 });
 
+// Keep the FX cache warm (TTL is 60s) so creating a payment never blocks on a
+// cold rate fetch — the first checkout of the day is as fast as the rest.
+(function warmRates() {
+  for (const code of Object.keys(CURRENCIES)) getRateForCurrency(code).catch(() => {});
+  setTimeout(warmRates, 50_000).unref?.();
+})();
+
 module.exports = app;

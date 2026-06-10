@@ -541,6 +541,19 @@ app.get(BASE, (req, res) => {
           .catch(function() {})
           .finally(function() { setTimeout(poll, 2500); });
       })();
+
+      // Quietly preload the checkout app once the page is idle, so its (heavy)
+      // bundle is cached and the popup opens fast on the first click.
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var warm = document.createElement('iframe');
+          warm.setAttribute('aria-hidden', 'true');
+          warm.setAttribute('tabindex', '-1');
+          warm.style.cssText = 'position:absolute;left:-9999px;width:0;height:0;border:0';
+          warm.src = '${ARCPAY_URL}/checkout/warmup';
+          document.body.appendChild(warm);
+        }, 1200);
+      });
     </script>
   `, { wide: true, wallet: true }));
 });
