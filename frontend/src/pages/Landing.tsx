@@ -436,7 +436,7 @@ export default function Landing() {
                 <Link to="/demo">
                   <Button size="lg">Guided walkthrough →</Button>
                 </Link>
-                <a href="/shop" target="_blank" rel="noreferrer">
+                <a href="/shop/" target="_blank" rel="noreferrer">
                   <Button size="lg" variant="outline">Open the full store ↗</Button>
                 </a>
               </div>

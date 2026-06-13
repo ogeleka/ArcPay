@@ -339,7 +339,7 @@ app.get(BASE, (req, res) => {
           </details>
         </div>
 
-        <a href="/shop" class="demo2-btn">
+        <a href="/shop/" class="demo2-btn">
           <span class="demo2-ic">🛍️</span>
           <span class="demo2-tx">
             <strong>Try Demo 2</strong>

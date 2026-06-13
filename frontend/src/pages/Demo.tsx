@@ -247,7 +247,7 @@ export default function Demo() {
               Open Footie Lagos store <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </a>
-          <a href="/shop" target="_blank" rel="noreferrer" className="block">
+          <a href="/shop/" target="_blank" rel="noreferrer" className="block">
             <Button variant="outline" className="w-full" size="lg">
               Or try the full store demo <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
