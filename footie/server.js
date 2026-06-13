@@ -168,6 +168,17 @@ function shell(title, body, opts = {}) {
     pre.code { background:#1e1e2e; color:#cdd6f4; border-radius:8px; padding:.85rem;
                font-size:.72rem; line-height:1.5; overflow-x:auto;
                font-family:ui-monospace,Menlo,Consolas,monospace; white-space:pre; }
+    /* "try demo 2" cta under the sidebar */
+    .demo2-btn { display:flex; align-items:center; gap:.75rem; margin-top:1rem;
+                 background:#6c47ff; color:#fff; text-decoration:none; border-radius:12px;
+                 padding:.85rem 1rem; box-shadow:0 4px 14px rgba(108,71,255,.3); transition:background .15s; }
+    .demo2-btn:hover { background:#5838e0; }
+    .demo2-ic { font-size:1.4rem; line-height:1; }
+    .demo2-tx { flex:1; line-height:1.25; }
+    .demo2-tx strong { display:block; font-size:.92rem; }
+    .demo2-tx small  { font-size:.72rem; opacity:.85; }
+    .demo2-arrow { font-size:1.1rem; opacity:.9; }
+
     .how { padding:0 1rem 1rem; }
     .how ol { padding-left:1.1rem; }
     .how li { font-size:.82rem; color:#555; line-height:1.5; margin-bottom:.5rem; }
@@ -327,6 +338,15 @@ app.get(BASE, (req, res) => {
             </ol>
           </details>
         </div>
+
+        <a href="/shop" class="demo2-btn">
+          <span class="demo2-ic">🛍️</span>
+          <span class="demo2-tx">
+            <strong>Try Demo 2</strong>
+            <small>A full e-commerce store on ArcPay</small>
+          </span>
+          <span class="demo2-arrow">↗</span>
+        </a>
       </aside>
 
       <!-- the shop + the live payments table -->
