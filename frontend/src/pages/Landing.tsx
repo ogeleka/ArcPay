@@ -430,11 +430,16 @@ export default function Landing() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">See a real payment in under 3 minutes</h2>
               <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                The Footie Lagos demo store runs the full ArcPay loop. Add Arc testnet to MetaMask, claim free test USDC, pick a shoe, and watch the payment settle on-chain — we walk you through every step.
+                Two ways to try it. The guided walkthrough takes you through the Footie Lagos store step by step, or jump straight into the full shop — a complete e-commerce store with accounts, a cart, and ArcPay checkout.
               </p>
-              <Link to="/demo">
-                <Button size="lg">Start the demo walkthrough →</Button>
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/demo">
+                  <Button size="lg">Guided walkthrough →</Button>
+                </Link>
+                <a href="/shop" target="_blank" rel="noreferrer">
+                  <Button size="lg" variant="outline">Open the full store ↗</Button>
+                </a>
+              </div>
             </div>
             <div className="space-y-3">
               {[
