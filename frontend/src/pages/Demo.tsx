@@ -247,8 +247,13 @@ export default function Demo() {
               Open Footie Lagos store <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </a>
+          <a href="/shop" target="_blank" rel="noreferrer" className="block">
+            <Button variant="outline" className="w-full" size="lg">
+              Or try the full store demo <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
+          </a>
           <p className="text-xs text-gray-400 text-center">
-            Opens in a new tab · running at {STORE_URL}
+            Both open in a new tab. The full store is a complete shop — accounts, cart, and ArcPay checkout.
           </p>
         </Step>
 
