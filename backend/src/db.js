@@ -9,7 +9,7 @@ db.pragma("foreign_keys = ON");
 function initDb() {
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   db.exec(schema);
-  // Migrations — safe to re-run; SQLite throws on duplicate columns, we swallow it
+  // Migrations - safe to re-run; SQLite throws on duplicate columns, we swallow it
   const migrations = [
     "ALTER TABLE merchants ADD COLUMN webhook_secret TEXT;",
     "ALTER TABLE payments ADD COLUMN currency TEXT DEFAULT 'USDC';",

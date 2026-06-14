@@ -5,7 +5,7 @@
  * Never throws.
  */
 
-// Supported fiat currencies — add new ones here; no other code change needed
+// Supported fiat currencies - add new ones here; no other code change needed
 const CURRENCIES = {
   NGN: { symbol: "₦", name: "Nigerian Naira",   fallbackEnv: "NGN_FALLBACK_RATE" },
   GHS: { symbol: "₵", name: "Ghanaian Cedi",    fallbackEnv: "GHS_FALLBACK_RATE" },
@@ -44,7 +44,7 @@ async function getRateForCurrency(code) {
     }
   } catch { /* fall through to env fallback */ }
 
-  // Env fallback — each currency only uses ITS OWN fallback (never cross-default to NGN)
+  // Env fallback - each currency only uses ITS OWN fallback (never cross-default to NGN)
   let envRate = parseFloat(process.env[CURRENCIES[upper].fallbackEnv]);
   if (isNaN(envRate) && upper === "USD") envRate = 1; // USD ≈ USDC
   if (!isNaN(envRate) && envRate > 0) return { rate: envRate, stale: true };

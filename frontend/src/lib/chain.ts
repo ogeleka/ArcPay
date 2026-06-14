@@ -1,7 +1,7 @@
 import { defineChain } from "viem";
 
 /**
- * Arc testnet — all chain-specific constants live here.
+ * Arc testnet - all chain-specific constants live here.
  * Import from this file anywhere you need chain config.
  */
 export const arcTestnet = defineChain({
@@ -24,11 +24,11 @@ export const arcTestnet = defineChain({
   testnet: true,
 });
 
-/** USDC system contract — the ERC-20 address on Arc */
+/** USDC system contract - the ERC-20 address on Arc */
 export const USDC_ADDRESS =
   "0x3600000000000000000000000000000000000000" as const;
 
-/** Deployed ArcPay contract address — set VITE_ARCPAY_ADDRESS in your .env */
+/** Deployed ArcPay contract address - set VITE_ARCPAY_ADDRESS in your .env */
 export const ARCPAY_ADDRESS = (
   import.meta.env.VITE_ARCPAY_ADDRESS ?? ""
 ) as `0x${string}`;

@@ -9,7 +9,7 @@ const ARCPAY_ABI = [
   "function createPayment(bytes32 paymentId, address merchant, uint256 amount, uint64 deadline) external",
 ];
 
-// Backend signer — owner of the deployed contract
+// Backend signer - owner of the deployed contract
 function getSigner() {
   const rpc  = process.env.ARC_TESTNET_RPC;
   const key  = process.env.PRIVATE_KEY;
@@ -25,11 +25,11 @@ function getSigner() {
 
 async function registerOnChain(paymentId, merchantWallet, amountUsdc, expiresAt) {
   const ctx = getSigner();
-  if (!ctx) { console.warn("[chain] PRIVATE_KEY or ARCPAY_ADDRESS not set — skipping on-chain registration"); return; }
+  if (!ctx) { console.warn("[chain] PRIVATE_KEY or ARCPAY_ADDRESS not set - skipping on-chain registration"); return; }
   const deadline = expiresAt ? BigInt(Math.floor(new Date(expiresAt).getTime() / 1000)) : 0n;
   const tx = await ctx.contract.createPayment(paymentId, merchantWallet, BigInt(amountUsdc), deadline);
   await tx.wait();
-  console.log(`[chain] createPayment ${paymentId.slice(0, 10)}… tx=${tx.hash.slice(0, 10)}…`);
+  console.log(`[chain] createPayment ${paymentId.slice(0, 10)}... tx=${tx.hash.slice(0, 10)}...`);
 }
 
 const EXPIRY_MS = 15 * 60 * 1000;
@@ -85,12 +85,12 @@ router.post("/", requireApiKey, async (req, res, next) => {
       const { rate } = await getRateForCurrency(effectiveCurrency);
       if (!rate) {
         return res.status(503).json({
-          error: `FX rate for ${effectiveCurrency} unavailable — set ${effectiveCurrency}_FALLBACK_RATE in .env`,
+          error: `FX rate for ${effectiveCurrency} unavailable - set ${effectiveCurrency}_FALLBACK_RATE in .env`,
         });
       }
       midRate     = rate;
       amountLocal = Number(amount);
-      // Surcharge the local amount THEN divide — markup goes to merchant, never fewer USDC
+      // Surcharge the local amount THEN divide - markup goes to merchant, never fewer USDC
       amountUsdc  = Math.ceil((amountLocal * (1 + markupBps / 10000)) / midRate * 1_000_000);
       lockedRate  = midRate;
     } else {
@@ -122,7 +122,7 @@ router.post("/", requireApiKey, async (req, res, next) => {
       metadata ? JSON.stringify(metadata) : null, expiresAt,
     );
 
-    // Register payment on-chain — await so the checkout URL is only returned after
+    // Register payment on-chain - await so the checkout URL is only returned after
     // the tx is mined. Arc has sub-second finality so this adds ~1-2s of latency.
     try {
       await registerOnChain(paymentId, merchantRow.wallet_address, amountUsdc, expiresAt);
@@ -155,7 +155,7 @@ router.post("/", requireApiKey, async (req, res, next) => {
 // Query params:
 //   status  = paid|pending|expired|refunded|released|all  (default: all)
 //   page    = 1-based page number  (default: 1)
-//   limit   = rows per page 1–100  (default: 25)
+//   limit   = rows per page 1-100  (default: 25)
 router.get("/", requireApiKey, (req, res) => {
   const rawStatus = (req.query.status ?? "all").toLowerCase();
   if (!VALID_STATUSES.has(rawStatus)) {
@@ -167,7 +167,7 @@ router.get("/", requireApiKey, (req, res) => {
   const offset = (page - 1) * limit;
   const q = (req.query.q ?? "").trim();
 
-  // Build WHERE clause — expiry is computed on-the-fly for "expired" filter
+  // Build WHERE clause - expiry is computed on-the-fly for "expired" filter
   let where = "merchant_id = ?";
   const params = [req.merchantId];
 

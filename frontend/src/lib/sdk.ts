@@ -1,5 +1,5 @@
 /**
- * ArcPay SDK — minimal TypeScript client.
+ * ArcPay SDK - minimal TypeScript client.
  * Server-side: keep your API key out of the browser.
  * Client-side: safe to use for demos; move the key server-side in production.
  */
@@ -69,7 +69,7 @@ export class ArcPay {
 /**
  * Verify an incoming ArcPay webhook signature.
  * Node.js (server-side): pass rawBody as string or Uint8Array.
- * Returns a promise — use `await verifyWebhook(...)`.
+ * Returns a promise - use `await verifyWebhook(...)`.
  */
 export async function verifyWebhook(
   rawBody: string | Uint8Array,

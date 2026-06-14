@@ -73,7 +73,7 @@ function SettledCard({
         rel="noreferrer"
         className="inline-block text-xs text-[#6c47ff] underline break-all"
       >
-        {hash.slice(0, 18)}…{hash.slice(-8)}
+        {hash.slice(0, 18)}...{hash.slice(-8)}
       </a>
       {returnUrl && (
         <button
@@ -293,7 +293,7 @@ export default function Checkout() {
               )}
             </div>
 
-            {/* C3 — Fee breakdown (only shown when merchant applied markup) */}
+            {/* C3 - Fee breakdown (only shown when merchant applied markup) */}
             {payment.markup_bps > 0 && payment.amount_ngn && payment.mid_rate && (
               <div className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5 text-xs space-y-1.5">
                 <p className="font-semibold text-gray-600 flex items-center gap-1.5">
@@ -358,7 +358,7 @@ export default function Checkout() {
                 {["checking", "creating", "approving", "paying"].includes(step) && (
                   <div className="rounded-xl bg-gray-50 p-3 space-y-2">
                     <StepRow
-                      label={step === "checking" ? "Confirming registration on-chain…" : "Payment registered on-chain ✓"}
+                      label={step === "checking" ? "Confirming registration on-chain..." : "Payment registered on-chain ✓"}
                       state={step === "checking" ? "active" : "done"}
                     />
                     <StepRow label="Approve USDC"  state={stepState("approving")} />
@@ -388,10 +388,10 @@ export default function Checkout() {
                 ) : ["checking", "creating", "approving", "paying"].includes(step) ? (
                   <Button className="w-full" disabled>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {step === "checking"  ? "Verifying on-chain registration…" :
-                     step === "creating"  ? "Registering on-chain…"            :
-                     step === "approving" ? "Approving USDC…"                  :
-                                           "Sending payment…"}
+                    {step === "checking"  ? "Verifying on-chain registration..." :
+                     step === "creating"  ? "Registering on-chain..."            :
+                     step === "approving" ? "Approving USDC..."                  :
+                                           "Sending payment..."}
                   </Button>
                 ) : (
                   <Button className="w-full" size="lg" onClick={handlePay}>
@@ -401,7 +401,7 @@ export default function Checkout() {
               </>
             )}
 
-            {/* D — Card coming soon + How to get USDC */}
+            {/* D - Card coming soon + How to get USDC */}
             {!settled && !isAlreadyPaid && !isExpired && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-200 px-3 py-2.5 text-xs text-gray-400">

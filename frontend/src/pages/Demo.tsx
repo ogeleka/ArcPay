@@ -10,7 +10,7 @@ const ARC_TESTNET = {
   chainId:         "0x4CEF52",        // 5042002 in hex
   chainName:       "Arc Testnet",
   // Arc's native token is really 6-decimal USDC, but wallets only accept 18 in the
-  // add-network call, so we send 18 here. Doesn't affect payments — those use the
+  // add-network call, so we send 18 here. Doesn't affect payments - those use the
   // USDC ERC-20 token, which carries its own decimals.
   nativeCurrency:  { name: "USD Coin", symbol: "USDC", decimals: 18 },
   rpcUrls:         ["https://rpc.testnet.arc.network"],
@@ -111,7 +111,7 @@ export default function Demo() {
         },
       });
       setUsdcAdded(true);
-    } catch { /* user rejected — that's fine */ }
+    } catch { /* user rejected - that's fine */ }
   }
 
   return (
@@ -124,18 +124,18 @@ export default function Demo() {
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Try the demo</h1>
         <p className="text-gray-500 max-w-md mx-auto">
-          Four steps to make a real on-chain payment through the Footie Lagos demo store — takes about 3 minutes.
+          Four steps to make a real on-chain payment through the Footie Lagos demo store - takes about 3 minutes.
         </p>
       </div>
 
       {/* Steps */}
       <div className="space-y-4">
 
-        {/* Step 1 — MetaMask */}
+        {/* Step 1 - MetaMask */}
         <Step n={1} title="Install MetaMask" subtitle="The wallet you'll use to pay" done={hasMetamask}>
           {hasMetamask ? (
             <div className="flex items-center gap-2 text-sm text-green-700">
-              <CheckCircle2 className="w-4 h-4" /> MetaMask detected — you're good.
+              <CheckCircle2 className="w-4 h-4" /> MetaMask detected - you're good.
             </div>
           ) : (
             <>
@@ -155,8 +155,8 @@ export default function Demo() {
           )}
         </Step>
 
-        {/* Step 2 — Add Arc network */}
-        <Step n={2} title="Add Arc Testnet to MetaMask" subtitle="One click — we fill in all the details" done={metamaskAdded}>
+        {/* Step 2 - Add Arc network */}
+        <Step n={2} title="Add Arc Testnet to MetaMask" subtitle="One click - we fill in all the details" done={metamaskAdded}>
           <p className="text-sm text-gray-500">
             Arc is a separate blockchain. You need to add it to MetaMask before you can use it.
           </p>
@@ -166,7 +166,7 @@ export default function Demo() {
               disabled={addingChain}
               className="inline-flex items-center gap-2 rounded-xl bg-[#6c47ff] text-white text-sm font-semibold px-5 py-2.5 hover:opacity-90 disabled:opacity-50"
             >
-              {addingChain ? "Adding…" : metamaskAdded ? "✓ Arc Testnet added" : "Add Arc Testnet to MetaMask"}
+              {addingChain ? "Adding..." : metamaskAdded ? "✓ Arc Testnet added" : "Add Arc Testnet to MetaMask"}
             </button>
           ) : (
             <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">Complete step 1 first.</p>
@@ -182,10 +182,10 @@ export default function Demo() {
           </div>
         </Step>
 
-        {/* Step 3 — Get test USDC */}
+        {/* Step 3 - Get test USDC */}
         <Step n={3} title="Get test USDC" subtitle="You'll need a small amount to pay with">
           <p className="text-sm text-gray-500">
-            Arc testnet USDC is free — it's only for testing. Claim some from the Circle faucet.
+            Arc testnet USDC is free - it's only for testing. Claim some from the Circle faucet.
           </p>
           <div className="flex flex-wrap gap-2">
             <a
@@ -219,8 +219,8 @@ export default function Demo() {
           </div>
         </Step>
 
-        {/* Step 4 — Try the real Footie store */}
-        <Step n={4} title="Open Footie Lagos and buy a shoe" subtitle="Pick a shoe, pay with USDC — watch it settle in under a second">
+        {/* Step 4 - Try the real Footie store */}
+        <Step n={4} title="Open Footie Lagos and buy a shoe" subtitle="Pick a shoe, pay with USDC - watch it settle in under a second">
           <p className="text-sm text-gray-500">
             You're ready. Click a shoe, log in (or register quickly), go to checkout,
             and click "Pay with ArcPay". Approve in MetaMask and the payment settles on-chain in under a second.
@@ -231,8 +231,8 @@ export default function Demo() {
               {[
                 ["Registered", "ArcPay backend pre-registers the payment on-chain"],
                 ["Approve",    "You allow the ArcPay contract to spend your USDC"],
-                ["Pay",        "USDC splits instantly — merchant gets 99.5%, 0.5% protocol fee"],
-                ["Webhook",    "ArcPay fires a signed webhook — Footie confirms the order"],
+                ["Pay",        "USDC splits instantly - merchant gets 99.5%, 0.5% protocol fee"],
+                ["Webhook",    "ArcPay fires a signed webhook - Footie confirms the order"],
                 ["Done ✅",    "You land back on Footie Lagos with your order confirmed"],
               ].map(([label, desc]) => (
                 <div key={label} className="flex gap-2">
@@ -253,7 +253,7 @@ export default function Demo() {
             </Button>
           </a>
           <p className="text-xs text-gray-400 text-center">
-            Both open in a new tab. The full store is a complete shop — accounts, cart, and ArcPay checkout.
+            Both open in a new tab. The full store is a complete shop - accounts, cart, and ArcPay checkout.
           </p>
         </Step>
 
@@ -261,7 +261,7 @@ export default function Demo() {
 
       {/* Footer note */}
       <div className="mt-8 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-xs text-gray-400 text-center">
-        This is a testnet demo — no real money is involved. Everything runs on Arc testnet.
+        This is a testnet demo - no real money is involved. Everything runs on Arc testnet.
         <span className="mx-2">·</span>
         <Link to="/docs" className="text-[#6c47ff] hover:underline">Read the docs</Link>
       </div>

@@ -19,7 +19,7 @@ function esc(s) {
 
 // the sample code we show in the sidebar. no backticks or ${} in here or the
 // template string below blows up
-const SNIPPET_ENV = `# .env — the API key is secret, server-side only
+const SNIPPET_ENV = `# .env - the API key is secret, server-side only
 ARCPAY_API_KEY=sk_live_xxxxxxxxxxxxxxxx
 ARCPAY_WEBHOOK_SECRET=whsec_xxxxxxxxxxxx
 ARCPAY_URL=https://arc.ogsnap.online
@@ -91,7 +91,7 @@ function shell(title, body, opts = {}) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title} — Footie Lagos</title>
+  <title>${title} - Footie Lagos</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -277,7 +277,7 @@ function shell(title, body, opts = {}) {
       var btn = document.getElementById('wallet-btn');
       if (!btn) return;
       if (addr) {
-        btn.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+        btn.textContent = addr.slice(0,6) + '...' + addr.slice(-4);
         btn.classList.add('connected');
         btn.title = 'Click to disconnect';
       } else {
@@ -330,9 +330,9 @@ app.get(BASE, (req, res) => {
           <details class="how">
             <summary>How it works</summary>
             <ol>
-              <li>Customer clicks <b>Pay with USDC</b> — your server asks ArcPay to create a payment.</li>
-              <li>ArcPay returns a hosted checkout URL — shown right here in a secure window.</li>
-              <li>They pay in USDC. Funds settle <b>straight to your wallet</b> — ArcPay never holds them.</li>
+              <li>Customer clicks <b>Pay with USDC</b> - your server asks ArcPay to create a payment.</li>
+              <li>ArcPay returns a hosted checkout URL - shown right here in a secure window.</li>
+              <li>They pay in USDC. Funds settle <b>straight to your wallet</b> - ArcPay never holds them.</li>
               <li>ArcPay sends a <b>signed webhook</b>; you verify it and fulfil the order.</li>
               <li>The whole loop finishes in <b>under a second</b>.</li>
             </ol>
@@ -352,7 +352,7 @@ app.get(BASE, (req, res) => {
       <!-- the shop + the live payments table -->
       <div>
         <p class="col-title">🛍️ Footie Lagos store</p>
-        <p class="intro">Fresh kicks, paid in stable dollars. Instant settlement, no middleman. Connect a wallet up top, then buy a pair — checkout opens right here.</p>
+        <p class="intro">Fresh kicks, paid in stable dollars. Instant settlement, no middleman. Connect a wallet up top, then buy a pair - checkout opens right here.</p>
         <div class="shoe-grid">${cards}</div>
 
         <div style="margin-top:2.25rem">
@@ -370,7 +370,7 @@ app.get(BASE, (req, res) => {
                 <tr><th>Order</th><th>Item</th><th>Amount</th><th>Status</th><th>Time</th><th>On-chain</th></tr>
               </thead>
               <tbody id="orders-body">
-                <tr><td colspan="6" class="empty">No payments yet — buy a pair to watch it land here in real time.</td></tr>
+                <tr><td colspan="6" class="empty">No payments yet - buy a pair to watch it land here in real time.</td></tr>
               </tbody>
             </table>
           </div>
@@ -388,7 +388,7 @@ app.get(BASE, (req, res) => {
         </div>
         <div id="pay-loading" class="modal-loading">
           <div class="spinner-lg"></div>
-          <p>Setting up your secure checkout…</p>
+          <p>Setting up your secure checkout...</p>
         </div>
         <iframe id="pay-frame" class="modal-frame" src="about:blank" allow="clipboard-write; payment"></iframe>
         <div id="pay-success" class="modal-success">
@@ -403,7 +403,7 @@ app.get(BASE, (req, res) => {
 
     <!-- shown when someone bails out of the popup before paying -->
     <div id="resume-bar" class="resume-bar" style="display:none">
-      <span>Checkout closed — payment still pending.</span>
+      <span>Checkout closed - payment still pending.</span>
       <button class="resume" onclick="reopenPay()">↩ Resume payment</button>
       <button class="dismiss" onclick="dismissResume()" title="Dismiss">✕</button>
     </div>
@@ -465,14 +465,14 @@ app.get(BASE, (req, res) => {
         if (!view.length) {
           var msg = orders.length
             ? 'No ' + statusFilter + ' payments.'
-            : 'No payments yet — buy a pair to watch it land here in real time.';
+            : 'No payments yet - buy a pair to watch it land here in real time.';
           el.innerHTML = '<tr><td colspan="6" class="empty">' + msg + '</td></tr>';
           return;
         }
         el.innerHTML = view.map(function(o) {
-          var last = o.status === 'paid' ? explorer(o) : '<span class="time">confirming…</span>';
+          var last = o.status === 'paid' ? explorer(o) : '<span class="time">confirming...</span>';
           return '<tr>' +
-            '<td class="oid">' + o.id.slice(0,8) + '…</td>' +
+            '<td class="oid">' + o.id.slice(0,8) + '...</td>' +
             '<td>' + o.emoji + ' ' + o.product + '</td>' +
             '<td class="amt">₦' + o.price_ngn.toLocaleString() + usdLabel(o) + '</td>' +
             '<td>' + badge(o.status) + '</td>' +
@@ -483,7 +483,7 @@ app.get(BASE, (req, res) => {
       }
 
       // opening/closing the checkout popup
-      // pop the modal up right away with a spinner — feels instant even while
+      // pop the modal up right away with a spinner - feels instant even while
       // the payment is being created and the checkout iframe loads
       function openModalLoading() {
         document.getElementById('pay-success').style.display = 'none';
@@ -584,7 +584,7 @@ app.post(`${BASE}/buy`, async (req, res) => {
   const wantsJson = !!req.query.json;
 
   if (!API_KEY || !WH_SECRET) {
-    if (wantsJson) return res.status(500).json({ error: "Store not configured — set ArcPay credentials in .env" });
+    if (wantsJson) return res.status(500).json({ error: "Store not configured - set ArcPay credentials in .env" });
     return res.status(500).send(shell("Setup needed", `
       <div class="status-box">
         <div class="icon">⚠️</div>
@@ -706,7 +706,7 @@ app.get(`${BASE}/orders/:id`, (req, res) => {
 
   const statusBlock = isPaid
     ? `<div class="tag paid">Paid ✓</div>`
-    : `<div class="tag pending"><span class="spinner"></span>Verifying payment…</div>`;
+    : `<div class="tag pending"><span class="spinner"></span>Verifying payment...</div>`;
 
   const message = isPaid
     ? `Your shoes are on their way! 🎉`
@@ -739,7 +739,7 @@ app.get(`${BASE}/orders/:id`, (req, res) => {
 // arcpay pings us here once the money lands. verify the signature, then mark it paid
 app.post(`${BASE}/arcpay/webhook`, (req, res) => {
   if (!WH_SECRET) {
-    console.error("[footie] ARCPAY_WEBHOOK_SECRET not set — rejecting webhook");
+    console.error("[footie] ARCPAY_WEBHOOK_SECRET not set - rejecting webhook");
     return res.status(500).json({ error: "Webhook secret not configured" });
   }
 
@@ -748,7 +748,7 @@ app.post(`${BASE}/arcpay/webhook`, (req, res) => {
   const expected = "sha256=" + crypto.createHmac("sha256", WH_SECRET).update(rawBody).digest("hex");
 
   if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
-    console.warn("[footie] webhook signature mismatch — rejected");
+    console.warn("[footie] webhook signature mismatch - rejected");
     return res.status(401).json({ error: "Invalid signature" });
   }
 
@@ -782,6 +782,6 @@ app.listen(PORT, () => {
   console.log(`\n👟  Footie Lagos running at http://localhost:${PORT}${BASE}`);
   console.log(`    ArcPay backend: ${ARCPAY_URL}`);
   if (!API_KEY || !WH_SECRET) {
-    console.warn("    ⚠️  ARCPAY_API_KEY / ARCPAY_WEBHOOK_SECRET not set — copy .env.example to .env\n");
+    console.warn("    ⚠️  ARCPAY_API_KEY / ARCPAY_WEBHOOK_SECRET not set - copy .env.example to .env\n");
   }
 });

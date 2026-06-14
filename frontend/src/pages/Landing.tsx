@@ -41,7 +41,7 @@ const DEMO_STEPS = [
           </div>
           <div className="flex items-center gap-2 bg-[#ede9ff] rounded-lg px-3 py-2 text-xs text-[#6c47ff] font-semibold animate-pulse">
             <div className="w-3 h-3 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
-            Sending payment…
+            Sending payment...
           </div>
         </div>
       </div>
@@ -159,7 +159,7 @@ function useLiveRates(): RateMap {
 
 // Main page
 
-const SDK_SNIPPET = `// 3 lines — that's the whole integration
+const SDK_SNIPPET = `// 3 lines - that's the whole integration
 const { payment_id } = await arcpay.createPayment({
   amount: 45000, currency: 'NGN',   // ₦45,000
 });
@@ -187,10 +187,10 @@ export default function Landing() {
               </h1>
               <p className="text-lg sm:text-xl text-blue-100/80 leading-relaxed mb-9 max-w-lg mx-auto lg:mx-0">
                 Settlement in under a second. No FX risk. No gateway holding your money.
-                Accept USDC natively — in naira, cedis, rand, shillings, or straight dollars.
+                Accept USDC natively - in naira, cedis, rand, shillings, or straight dollars.
                 Your currency, your choice.
               </p>
-              {/* phone mockup — shown here on mobile, in the right column on desktop */}
+              {/* phone mockup - shown here on mobile, in the right column on desktop */}
               <div className="lg:hidden flex justify-center mb-9">
                 <AnimatedDemo />
               </div>
@@ -216,7 +216,7 @@ export default function Landing() {
                 <span>· more soon</span>
               </div>
             </div>
-            {/* Right — animated demo (desktop only; on mobile it sits above the buttons) */}
+            {/* Right - animated demo (desktop only; on mobile it sits above the buttons) */}
             <div className="shrink-0 hidden lg:block">
               <AnimatedDemo />
             </div>
@@ -262,7 +262,7 @@ export default function Landing() {
             {
               icon: Zap,
               title: "Sub-second finality",
-              body: "Payments confirm before the customer closes the tab. Stripe's 2–7 day settlement looks archaic next to this. That speed is structural, not a feature flag.",
+              body: "Payments confirm before the customer closes the tab. Stripe's 2-7 day settlement looks archaic next to this. That speed is structural, not a feature flag.",
             },
             {
               icon: Shield,
@@ -291,7 +291,7 @@ export default function Landing() {
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Price local. Get paid in dollars.</h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Quote prices in your customers' currency. ArcPay converts at the live mid-market
-              rate and locks it for the payment window — you settle in stable USDC.
+              rate and locks it for the payment window - you settle in stable USDC.
             </p>
           </div>
 
@@ -317,7 +317,7 @@ export default function Landing() {
                         1 USDC = {c.symbol}{Math.round(r.rate).toLocaleString()}
                       </p>
                     ) : (
-                      <p className="text-sm text-gray-300">rate loading…</p>
+                      <p className="text-sm text-gray-300">rate loading...</p>
                     )}
                   </div>
                 </div>
@@ -326,7 +326,7 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-sm text-gray-400 mt-8">
-            More markets coming soon — Tanzania, Uganda, Rwanda &amp; Egypt.
+            More markets coming soon - Tanzania, Uganda, Rwanda &amp; Egypt.
           </p>
         </div>
       </section>
@@ -370,7 +370,7 @@ export default function Landing() {
           <div className="relative bg-[#1e1e2e]">
             <CopyBtn text={SDK_SNIPPET} />
             <pre className="text-[#cdd6f4] p-6 text-sm font-mono leading-relaxed overflow-x-auto">
-              <span className="text-[#6c7086]">{"// 3 lines — that's the whole integration"}</span>
+              <span className="text-[#6c7086]">{"// 3 lines - that's the whole integration"}</span>
               {"\n"}
               <span className="text-[#89b4fa]">const</span>
               {" { payment_id } = "}
@@ -403,7 +403,7 @@ export default function Landing() {
           <h2 className="text-3xl font-bold uppercase tracking-tight mb-4">Built for African merchants</h2>
           <p className="text-blue-100/80 text-lg leading-relaxed max-w-2xl mx-auto mb-8">
             Price your goods in Naira, Cedis, Shillings or Rand. Get paid in stable dollars.
-            ArcPay shows customers the local price and converts at a locked rate —
+            ArcPay shows customers the local price and converts at a locked rate -
             so no one loses money to FX drift between checkout and payment.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
@@ -430,7 +430,7 @@ export default function Landing() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">See a real payment in under 3 minutes</h2>
               <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                Two ways to try it. The guided walkthrough takes you through the Footie Lagos store step by step, or jump straight into the full shop — a complete e-commerce store with accounts, a cart, and ArcPay checkout.
+                Two ways to try it. The guided walkthrough takes you through the Footie Lagos store step by step, or jump straight into the full shop - a complete e-commerce store with accounts, a cart, and ArcPay checkout.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/demo">
@@ -443,7 +443,7 @@ export default function Landing() {
             </div>
             <div className="space-y-3">
               {[
-                { n: "1", label: "Add Arc testnet to MetaMask",       sub: "One click — we fill in the details" },
+                { n: "1", label: "Add Arc testnet to MetaMask",       sub: "One click - we fill in the details" },
                 { n: "2", label: "Claim free test USDC from faucet",  sub: "Takes about 10 seconds to arrive"   },
                 { n: "3", label: "Buy a shoe on Footie Lagos",        sub: "Real checkout, real on-chain tx"    },
                 { n: "4", label: "Watch it settle in under 1 second", sub: "Sub-second finality on Arc"         },

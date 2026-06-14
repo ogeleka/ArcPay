@@ -58,7 +58,7 @@ router.post("/register", async (req, res, next) => {
     if (website && website.length > 500)
       return res.status(400).json({ error: "Website URL too long" });
 
-    // Optional business profile — validate currency + markup if provided
+    // Optional business profile - validate currency + markup if provided
     const currency = (default_currency || "NGN").toUpperCase();
     if (!SUPPORTED_CURRENCIES.has(currency))
       return res.status(400).json({ error: `Unsupported currency: ${currency}` });
@@ -67,7 +67,7 @@ router.post("/register", async (req, res, next) => {
     if (markup_bps !== undefined) {
       markup = parseInt(markup_bps);
       if (isNaN(markup) || markup < 0 || markup > 500)
-        return res.status(400).json({ error: "markup_bps must be 0–500 (max 5%)" });
+        return res.status(400).json({ error: "markup_bps must be 0-500 (max 5%)" });
     }
 
     const existing = db.prepare("SELECT id FROM merchants WHERE email = ?").get(email.trim().toLowerCase());
@@ -158,7 +158,7 @@ router.post("/wallet/login", (req, res, next) => {
     const entry = walletNonces.get(addr);
     if (!entry || entry.expires < Date.now()) {
       walletNonces.delete(addr);
-      return res.status(401).json({ error: "Nonce expired — please try again" });
+      return res.status(401).json({ error: "Nonce expired - please try again" });
     }
 
     // Verify the signature recovers to the claimed address
@@ -190,7 +190,7 @@ router.post("/wallet/login", (req, res, next) => {
 });
 
 // POST /auth/change-password
-// Requires current password — no silent resets.
+// Requires current password - no silent resets.
 router.post("/change-password", async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"] ?? "";
@@ -202,7 +202,7 @@ router.post("/change-password", async (req, res, next) => {
       const payload = require("jsonwebtoken").verify(authHeader.slice(7), process.env.JWT_SECRET);
       merchantId = payload.merchantId;
     } catch {
-      return res.status(401).json({ error: "Session expired — please sign in again" });
+      return res.status(401).json({ error: "Session expired - please sign in again" });
     }
 
     const { current_password, new_password } = req.body;

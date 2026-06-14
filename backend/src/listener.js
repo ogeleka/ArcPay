@@ -36,7 +36,7 @@ function persist(eventType, paymentId, payer, txHash, blockNumber) {
     if (!err.message.includes("UNIQUE constraint failed")) throw err;
   }
 
-  console.log(`[listener] ${eventType} ${paymentId.slice(0, 10)}… tx=${txHash ? txHash.slice(0, 10) : "n/a"}…`);
+  console.log(`[listener] ${eventType} ${paymentId.slice(0, 10)}... tx=${txHash ? txHash.slice(0, 10) : "n/a"}...`);
 
   const row = db.prepare(
     `SELECT m.webhook_url, m.webhook_secret FROM payments p
@@ -80,7 +80,7 @@ function startListener() {
   const rpc     = process.env.ARC_TESTNET_RPC;
   const address = process.env.ARCPAY_ADDRESS;
   if (!rpc || !address) {
-    console.warn("[listener] ARC_TESTNET_RPC or ARCPAY_ADDRESS not set — skipping");
+    console.warn("[listener] ARC_TESTNET_RPC or ARCPAY_ADDRESS not set - skipping");
     return;
   }
 
@@ -106,11 +106,11 @@ function startListener() {
           const statusCode = Number(onChain.status);
           const eventType  = ON_CHAIN_STATUS[statusCode];
           if (eventType) {
-            console.log(`[listener] catch-up: ${eventType} for ${id.slice(0, 10)}…`);
+            console.log(`[listener] catch-up: ${eventType} for ${id.slice(0, 10)}...`);
             persist(eventType, id, onChain.payer, null, null);
           }
         } catch (err) {
-          // single payment check failed — skip it, try next cycle
+          // single payment check failed - skip it, try next cycle
         }
       }
     } catch (err) {
@@ -151,7 +151,7 @@ function startListener() {
         } catch (err) {
           consecutiveErrors++;
           if (consecutiveErrors >= 5) {
-            console.warn("[listener] too many log errors — restarting");
+            console.warn("[listener] too many log errors - restarting");
             provider.removeAllListeners();
             return setTimeout(tryStart, 10_000);
           }

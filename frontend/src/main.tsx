@@ -21,6 +21,6 @@ createRoot(document.getElementById("root")!).render(
           </BrowserRouter>
         </RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </WagmiProvider>EEDS 
   </StrictMode>
 );

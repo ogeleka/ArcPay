@@ -1,4 +1,4 @@
-/** Minimal ABIs — only the functions the frontend calls */
+/** Minimal ABIs - only the functions the frontend calls */
 
 export const ARCPAY_ABI = [
   {

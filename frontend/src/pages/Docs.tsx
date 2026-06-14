@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Check, Copy } from "lucide-react";
 
-// Base URL of this deployment — examples always match where the docs are served from
+// Base URL of this deployment - examples always match where the docs are served from
 const API_BASE = typeof window !== "undefined" ? window.location.origin : "https://arc.ogsnap.online";
 
 // Code block with language tabs + copy
@@ -132,7 +132,7 @@ export default function Docs() {
         <Section id="quickstart" title="Quick Start">
           <p>Accept your first USDC payment in under 10 minutes.</p>
           <H3>1. Create an account & get your API key</H3>
-          <p>Register from the <a href="/dashboard" className="text-[#6c47ff] underline">dashboard</a>, or call the API directly. You get back an API key and a webhook secret — both shown once.</p>
+          <p>Register from the <a href="/dashboard" className="text-[#6c47ff] underline">dashboard</a>, or call the API directly. You get back an API key and a webhook secret - both shown once.</p>
           <CodeBlock snippets={{
             cURL: `curl -X POST ${API_BASE}/auth/register \\
   -H "Content-Type: application/json" \\
@@ -145,7 +145,7 @@ export default function Docs() {
   }'
 
 # Response: { token, merchant_id, api_key, webhook_secret }
-# Store api_key + webhook_secret safely — shown ONCE.`,
+# Store api_key + webhook_secret safely - shown ONCE.`,
             Node: `const res = await fetch('${API_BASE}/auth/register', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -158,7 +158,7 @@ export default function Docs() {
   }),
 });
 const { api_key, webhook_secret } = await res.json();
-// Store these safely — shown ONCE.`,
+// Store these safely - shown ONCE.`,
           }} />
 
           <H3>2. Create a payment</H3>
@@ -168,7 +168,7 @@ const { api_key, webhook_secret } = await res.json();
   -H "Content-Type: application/json" \\
   -d '{ "amount": 1000000 }'   # 1 USDC = 1 000 000 micro-units
 
-# Response includes payment_url — redirect your customer there.`,
+# Response includes payment_url - redirect your customer there.`,
             Node: `const { payment_url } = await fetch('${API_BASE}/payments', {
   method: 'POST',
   headers: {
@@ -309,7 +309,7 @@ def webhook():
   customerEmail: 'buyer@example.com',
 });
 // payment.amount_usdc → "2903226"  (≈ 2.90 USDC at ₦1,550/USD)
-// payment.rate        → 1550        (locked — won't drift)`,
+// payment.rate        → 1550        (locked - won't drift)`,
             Python: `resp = requests.post(
     "${API_BASE}/payments",
     headers={"X-Api-Key": key},
@@ -326,8 +326,8 @@ def webhook():
           <H3>Events</H3>
           <div className="space-y-1">
             {[
-              ["payment.paid",     "Customer paid — funds settled straight to your wallet"],
-              ["payment.refunded", "Merchant refunded — funds returned to the payer"],
+              ["payment.paid",     "Customer paid - funds settled straight to your wallet"],
+              ["payment.refunded", "Merchant refunded - funds returned to the payer"],
             ].map(([e, d]) => (
               <div key={e} className="flex gap-3 text-sm">
                 <InlineCode>{e}</InlineCode>
@@ -369,7 +369,7 @@ def webhook():
 }).then(r => r.json());
 
 if (payment.status !== 'paid') {
-  throw new Error('Do not ship — payment not confirmed');
+  throw new Error('Do not ship - payment not confirmed');
 }`,
             Python: `p = requests.get(
     f"${API_BASE}/payments/{payment_id}",
@@ -395,7 +395,7 @@ await arcpay.checkout({ amount: 4500, currency: 'NGN', orderId: 'FOOTIE-1021' })
           }} />
 
           <H3>Browser script tag <span className="text-xs font-normal text-gray-400">(hosted CDN coming soon)</span></H3>
-          <p>A hosted, drop-in script is on the roadmap. Until then, integrate server-side with the Node example above — that keeps your API key off the browser, which is the recommended pattern anyway.</p>
+          <p>A hosted, drop-in script is on the roadmap. Until then, integrate server-side with the Node example above - that keeps your API key off the browser, which is the recommended pattern anyway.</p>
           <CodeBlock snippets={{
             cURL: `<!-- Preview of the planned drop-in widget -->
 <script src="${API_BASE}/sdk/v1/arcpay.js"></script>
@@ -410,15 +410,15 @@ await arcpay.checkout({ amount: 4500, currency: 'NGN', orderId: 'FOOTIE-1021' })
         </Section>
 
         {/* Footie walkthrough */}
-        <Section id="footie" title="Footie Store — Full Walkthrough">
+        <Section id="footie" title="Footie Store - Full Walkthrough">
           <p>
             Footie Lagos sells premium sneakers priced in Naira. Here's the exact integration
             that powers the <a href="/demo" className="text-[#6c47ff] underline">live demo</a>.
           </p>
 
-          <H3>Step 1 — Footie's server creates a payment</H3>
+          <H3>Step 1 - Footie's server creates a payment</H3>
           <CodeBlock snippets={{
-            Node: `// footie-server.js — runs on Footie's backend
+            Node: `// footie-server.js - runs on Footie's backend
 app.post('/checkout', async (req, res) => {
   const { productId, customerEmail } = req.body;
   const product = await db.products.findById(productId);
@@ -440,13 +440,13 @@ app.post('/checkout', async (req, res) => {
 });`,
           }} />
 
-          <H3>Step 2 — Customer pays on ArcPay checkout</H3>
+          <H3>Step 2 - Customer pays on ArcPay checkout</H3>
           <p>
             Customer sees "₦45,000 · 29.03 USDC" and the locked rate. They connect MetaMask,
-            approve USDC, and pay in one tap. Funds go straight to Footie's wallet — ArcPay never holds the money.
+            approve USDC, and pay in one tap. Funds go straight to Footie's wallet - ArcPay never holds the money.
           </p>
 
-          <H3>Step 3 — Footie receives a webhook and ships</H3>
+          <H3>Step 3 - Footie receives a webhook and ships</H3>
           <CodeBlock snippets={{
             Node: `app.post('/webhooks/arcpay', express.raw({ type: 'application/json' }), (req, res) => {
   // 1. Verify signature
@@ -465,7 +465,7 @@ app.post('/checkout', async (req, res) => {
 });`,
           }} />
 
-          <H3>Step 4 — Belt & suspenders</H3>
+          <H3>Step 4 - Belt & suspenders</H3>
           <CodeBlock snippets={{
             Node: `// Footie can also poll directly to confirm before shipping
 const payment = await fetch(\`/payments/\${paymentId}\`, {
@@ -492,7 +492,7 @@ if (payment.status !== 'paid') throw new Error('Not paid yet');`,
                 ["404", "Not found",       "Payment ID doesn't exist or belongs to another merchant"],
                 ["409", "Conflict",        "Email already registered"],
                 ["503", "Service unavail.","FX rate unavailable and no NGN_FALLBACK_RATE set"],
-                ["500", "Server error",    "Something unexpected — check backend logs"],
+                ["500", "Server error",    "Something unexpected - check backend logs"],
               ].map(([s, m, c]) => (
                 <tr key={s as string} className="border border-gray-200">
                   <td className="px-3 py-1.5 font-mono text-[#6c47ff]">{s}</td>

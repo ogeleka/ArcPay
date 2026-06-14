@@ -12,9 +12,9 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Security headers
-app.use(helmet({ contentSecurityPolicy: false })); // CSP disabled — checkout page loads external scripts
+app.use(helmet({ contentSecurityPolicy: false })); // CSP disabled - checkout page loads external scripts
 
-// CORS — explicit allowlist only
+// CORS - explicit allowlist only
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3003",
@@ -30,7 +30,7 @@ const limiter = (max, windowMin) => rateLimit({
   max,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many requests — please slow down." },
+  message: { error: "Too many requests - please slow down." },
 });
 
 app.use("/auth/login",    limiter(10, 15));  // 10 attempts per 15 min
@@ -52,7 +52,7 @@ app.get("/api/pay/:id", (req, res) => {
 
   if (!row) return res.status(404).json({ error: "Payment not found" });
 
-  // Compute expiry on-the-fly — no contract change needed
+  // Compute expiry on-the-fly - no contract change needed
   const expired = row.status === "pending" && row.expires_at && new Date(row.expires_at) < new Date();
   const status  = expired ? "expired" : row.status;
 
@@ -101,13 +101,13 @@ app.use("/merchants", require("./routes/merchants"));
 app.use("/payments", require("./routes/payments"));
 
 app.use((err, req, res, next) => {
-  console.error(`[error] ${req.method} ${req.path} — ${err.message}`);
+  console.error(`[error] ${req.method} ${req.path} - ${err.message}`);
   if (process.env.NODE_ENV !== "production") console.error(err.stack);
   res.status(err.status ?? 500).json({ error: "Internal server error" });
 });
 
 // Keep the FX cache warm (TTL is 60s) so creating a payment never blocks on a
-// cold rate fetch — the first checkout of the day is as fast as the rest.
+// cold rate fetch - the first checkout of the day is as fast as the rest.
 (function warmRates() {
   for (const code of Object.keys(CURRENCIES)) getRateForCurrency(code).catch(() => {});
   setTimeout(warmRates, 50_000).unref?.();

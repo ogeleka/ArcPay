@@ -16,7 +16,7 @@ function requireApiKey(req, res, next) {
       req.merchantId = payload.merchantId;
       return next();
     } catch {
-      return res.status(401).json({ error: "Session expired — please sign in again" });
+      return res.status(401).json({ error: "Session expired - please sign in again" });
     }
   }
 
@@ -28,7 +28,7 @@ function requireApiKey(req, res, next) {
     return next();
   }
 
-  return res.status(401).json({ error: "Authentication required — provide Authorization: Bearer <token> or X-Api-Key header" });
+  return res.status(401).json({ error: "Authentication required - provide Authorization: Bearer <token> or X-Api-Key header" });
 }
 
 module.exports = { requireApiKey };

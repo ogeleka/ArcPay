@@ -6,7 +6,7 @@ const { requireApiKey } = require("../middleware/auth");
 
 const USDC_ABI = ["function balanceOf(address) view returns (uint256)"];
 
-// Blocks SSRF — only allow HTTPS to public hosts
+// Blocks SSRF - only allow HTTPS to public hosts
 function isSafeWebhookUrl(raw) {
   if (!raw) return true; // optional field
   try {
@@ -20,12 +20,12 @@ function isSafeWebhookUrl(raw) {
 
 const router = express.Router();
 
-// POST /merchants — legacy open endpoint removed (use POST /auth/register instead)
+// POST /merchants - legacy open endpoint removed (use POST /auth/register instead)
 router.post("/", (_req, res) => {
   res.status(410).json({ error: "This endpoint is gone. Use POST /auth/register to create an account." });
 });
 
-// GET /merchants/me — profile + live on-chain USDC balance
+// GET /merchants/me - profile + live on-chain USDC balance
 router.get("/me", requireApiKey, async (req, res, next) => {
   try {
     const merchant = db.prepare(
@@ -57,7 +57,7 @@ router.get("/me", requireApiKey, async (req, res, next) => {
   }
 });
 
-// POST /merchants/me/webhook-test — send a fake payment.paid event to webhook URL
+// POST /merchants/me/webhook-test - send a fake payment.paid event to webhook URL
 router.post("/me/webhook-test", requireApiKey, async (req, res, next) => {
   try {
     const merchant = db.prepare(
@@ -68,7 +68,7 @@ router.post("/me/webhook-test", requireApiKey, async (req, res, next) => {
       return res.status(400).json({ error: "No webhook URL configured" });
     }
     if (!merchant.webhook_secret) {
-      return res.status(400).json({ error: "No webhook secret — re-register to generate one" });
+      return res.status(400).json({ error: "No webhook secret - re-register to generate one" });
     }
 
     const { deliver } = require("../webhook");
@@ -96,7 +96,7 @@ router.post("/me/webhook-test", requireApiKey, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// POST /merchants/me/rotate-key — invalidate old API key, issue a new one
+// POST /merchants/me/rotate-key - invalidate old API key, issue a new one
 router.post("/me/rotate-key", requireApiKey, (req, res, next) => {
   try {
     // Delete all existing keys for this merchant
@@ -107,11 +107,11 @@ router.post("/me/rotate-key", requireApiKey, (req, res, next) => {
     db.prepare("INSERT INTO api_keys (id, merchant_id, key_hash) VALUES (?, ?, ?)")
       .run(crypto.randomUUID(), req.merchantId, keyHash);
 
-    res.json({ api_key: apiKey, message: "Previous key revoked. Store this key safely — it won't be shown again." });
+    res.json({ api_key: apiKey, message: "Previous key revoked. Store this key safely - it won't be shown again." });
   } catch (err) { next(err); }
 });
 
-// PATCH /merchants/me — update profile fields, webhook, markup, currency
+// PATCH /merchants/me - update profile fields, webhook, markup, currency
 router.patch("/me", requireApiKey, (req, res, next) => {
   try {
     const { name, email, wallet_address, webhook_url, markup_bps, default_currency } = req.body;
@@ -143,7 +143,7 @@ router.patch("/me", requireApiKey, (req, res, next) => {
     if (markup_bps !== undefined) {
       const bps = parseInt(markup_bps);
       if (isNaN(bps) || bps < 0 || bps > 500)
-        return res.status(400).json({ error: "markup_bps must be 0–500 (max 5%)" });
+        return res.status(400).json({ error: "markup_bps must be 0-500 (max 5%)" });
       db.prepare("UPDATE merchants SET markup_bps = ? WHERE id = ?").run(bps, req.merchantId);
     }
     if (default_currency !== undefined) {

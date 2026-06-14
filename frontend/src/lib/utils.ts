@@ -23,7 +23,7 @@ export function secondsUntil(iso: string | null): number {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
 
-/** Truncate an address: 0x1234…abcd */
+/** Truncate an address: 0x1234...abcd */
 export function truncAddr(addr: string, chars = 4): string {
-  return `${addr.slice(0, chars + 2)}…${addr.slice(-chars)}`;
+  return `${addr.slice(0, chars + 2)}...${addr.slice(-chars)}`;
 }

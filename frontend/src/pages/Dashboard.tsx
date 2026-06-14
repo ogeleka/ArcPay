@@ -38,7 +38,7 @@ function buildChart(payments: Payment[], days = 7) {
   return Object.entries(map).map(([date, usdc]) => ({ date: date.slice(5), usdc }));
 }
 
-function trunc(s: string, n = 10) { return s.slice(0, n) + "…"; }
+function trunc(s: string, n = 10) { return s.slice(0, n) + "..."; }
 
 function fmtTime(isoStr: string) {
   const d = new Date(isoStr.includes("T") ? isoStr : isoStr + " UTC");
@@ -176,21 +176,21 @@ function WelcomeWalkthrough({
     {
       icon: Sparkles,
       title: `Welcome to ArcPay, ${merchantName}! 👋`,
-      body: "Accept dollar-stable USDC payments on Arc — funds settle straight to your own wallet in under a second. ArcPay never holds your money. Let's get you set up in four quick steps.",
+      body: "Accept dollar-stable USDC payments on Arc - funds settle straight to your own wallet in under a second. ArcPay never holds your money. Let's get you set up in four quick steps.",
       action: null as null | { label: string; run: () => void },
       done: false,
     },
     {
       icon: Wallet,
       title: "1 · Add your settlement wallet",
-      body: "This is the wallet where your USDC lands after every payment. Connect MetaMask or paste your address — it's non-custodial, so only you control the funds.",
+      body: "This is the wallet where your USDC lands after every payment. Connect MetaMask or paste your address - it's non-custodial, so only you control the funds.",
       action: { label: "Open profile settings", run: actions.onProfile },
       done: hasWallet,
     },
     {
       icon: Webhook,
       title: "2 · Set your webhook URL",
-      body: "ArcPay sends a signed notification to your server the moment a payment confirms on-chain — so your app can ship the order automatically. Add the endpoint and send a test.",
+      body: "ArcPay sends a signed notification to your server the moment a payment confirms on-chain - so your app can ship the order automatically. Add the endpoint and send a test.",
       action: { label: "Open webhook settings", run: actions.onWebhook },
       done: hasWebhook,
     },
@@ -204,7 +204,7 @@ function WelcomeWalkthrough({
     {
       icon: Key,
       title: "4 · Grab your API key",
-      body: "Ready to integrate your own store? Your API key authenticates server-side requests. Keep it secret — never put it in browser code. Full guides live in the docs.",
+      body: "Ready to integrate your own store? Your API key authenticates server-side requests. Keep it secret - never put it in browser code. Full guides live in the docs.",
       action: { label: "View API key", run: actions.onApiKey },
       done: false,
     },
@@ -297,7 +297,7 @@ const USE_CASES = [
   "Build for my clients",
 ];
 
-// Countries we operate in — each maps to its local currency for FX conversion
+// Countries we operate in - each maps to its local currency for FX conversion
 const COUNTRIES = [
   { code: "NG", flag: "🇳🇬", name: "Nigeria",      currency: "NGN", symbol: "₦"   },
   { code: "GH", flag: "🇬🇭", name: "Ghana",        currency: "GHS", symbol: "₵"   },
@@ -409,7 +409,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
 
   async function handleRegister() {
     setRegErr(null);
-    if (!isAddr(wallet)) { setRegErr("Enter a valid wallet address (0x… 42 characters). Copy it from MetaMask."); return; }
+    if (!isAddr(wallet)) { setRegErr("Enter a valid wallet address (0x... 42 characters). Copy it from MetaMask."); return; }
     if (regPass.length < 8) { setRegErr("Password must be at least 8 characters."); return; }
     setRegBusy(true);
     try {
@@ -492,7 +492,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                 </div>
               </div>
               <Button className="w-full" onClick={handleSignIn} disabled={siBusy || !siEmail || !siPass}>
-                {siBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in…</> : "Sign in"}
+                {siBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : "Sign in"}
               </Button>
 
               {/* divider */}
@@ -508,7 +508,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                 disabled={walletBusy}
                 className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
                 {walletBusy
-                  ? <><Loader2 className="w-4 h-4 animate-spin" />Check your wallet…</>
+                  ? <><Loader2 className="w-4 h-4 animate-spin" />Check your wallet...</>
                   : <><Wallet className="w-4 h-4 text-[#6c47ff]" />Sign in with wallet</>}
               </button>
               <p className="text-[11px] text-center text-gray-400 -mt-1">
@@ -638,7 +638,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                             </div>
                           </button>
                         ))}
-                        {/* Global / USDC-only — an equal, first-class choice */}
+                        {/* Global / USDC-only - an equal, first-class choice */}
                         <button type="button" onClick={() => setMarket("GLOBAL")}
                           className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all col-span-2 ${
                             market === "GLOBAL"
@@ -654,7 +654,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                       </div>
                       <p className="text-xs text-gray-400 mt-1.5">
                         {market === "GLOBAL"
-                          ? "You'll price directly in USDC — no FX conversion."
+                          ? "You'll price directly in USDC - no FX conversion."
                           : `You'll price in ${COUNTRIES.find(c => c.code === market)?.currency ?? "your currency"}; customers pay in USDC at the live rate.`}
                       </p>
                     </div>
@@ -671,9 +671,9 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                       <div className="relative">
                         <Wallet className="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input value={wallet} onChange={e => setWallet(e.target.value)}
-                          placeholder="0xD4F3…7b87" className={`${inputCls} pl-9 font-mono`} />
+                          placeholder="0xD4F3...7b87" className={`${inputCls} pl-9 font-mono`} />
                       </div>
-                      <p className="text-xs mt-1 text-gray-400">Where your USDC settles — connect MetaMask to fill this automatically. Non-custodial.</p>
+                      <p className="text-xs mt-1 text-gray-400">Where your USDC settles - connect MetaMask to fill this automatically. Non-custodial.</p>
                       {wallet && !isAddr(wallet) && (
                         <p className="text-xs text-red-500 mt-1">That doesn't look like a valid wallet address.</p>
                       )}
@@ -697,7 +697,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                         <ArrowLeft className="w-4 h-4" />
                       </Button>
                       <Button className="flex-1" onClick={handleRegister} disabled={regBusy}>
-                        {regBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating account…</> : "Create my account →"}
+                        {regBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating account...</> : "Create my account →"}
                       </Button>
                     </div>
                   </>
@@ -713,7 +713,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                 <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-green-800">You're all set, {regResult.merchant_name}!</p>
-                  <p className="text-xs text-green-700 mt-0.5">Copy your credentials below — they won't be shown again.</p>
+                  <p className="text-xs text-green-700 mt-0.5">Copy your credentials below - they won't be shown again.</p>
                 </div>
               </div>
               {[
@@ -732,7 +732,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
               ))}
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800 flex gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                The API key is for your server only — never put it in frontend code. Your password is how you log in here.
+                The API key is for your server only - never put it in frontend code. Your password is how you log in here.
               </div>
               <Button className="w-full" onClick={handleEnterDashboard}>Go to dashboard →</Button>
             </CardBody>
@@ -816,7 +816,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(true);
 
-  // First-timer walkthrough — auto-opens once per merchant, re-openable from the topbar
+  // First-timer walkthrough - auto-opens once per merchant, re-openable from the topbar
   const guideKey = `arcpay_walkthrough_seen_${merchant.id}`;
   const [showGuide, setShowGuide] = useState(() => localStorage.getItem(guideKey) !== "1");
   function closeGuide() {
@@ -873,7 +873,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     return () => clearInterval(pollRef.current);
   }, [refresh]);
 
-  // Debounced search — reset to page 1
+  // Debounced search - reset to page 1
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); refresh(statusFilter, 1, search); }, 350);
     return () => clearTimeout(t);
@@ -989,14 +989,14 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     } finally { setExporting(false); }
   }
 
-  // Checklist completion (A3) — derived from merchant state
+  // Checklist completion (A3) - derived from merchant state
   const hasWallet  = !!merchant.wallet_address;
   const hasWebhook = !!merchant.webhook_url;
   const hasPayment = merchant.total_payments > 0;
   const hasMarkup  = (merchant.markup_bps ?? 0) > 0;
   const coreDone   = hasWallet && hasWebhook && hasPayment;
 
-  // "All set" banner — dismiss permanently per merchant
+  // "All set" banner - dismiss permanently per merchant
   const bannerKey = `arcpay_setup_done_${merchant.id}`;
   const [bannerDismissed, setBannerDismissed] = useState(
     () => localStorage.getItem(bannerKey) === "1"
@@ -1032,9 +1032,9 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
   const settingsLabel = SETTINGS_TABS.find(t => t.id === settingsTab)?.label ?? "Settings";
 
-  const balanceStr = merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "—";
+  const balanceStr = merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "-";
 
-  // "Your tools" cards on Home — tailored to the merchant's business type
+  // "Your tools" cards on Home - tailored to the merchant's business type
   type Tool = { icon: typeof Link2; title: string; desc: string; onClick?: () => void; soon?: boolean };
   const TOOLS: Tool[] = (() => {
     const link     = { icon: Link2,      title: "Payment links",  desc: "Create a shareable pay link", onClick: () => setShowModal(true) };
@@ -1051,7 +1051,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     }
   })();
 
-  // Local-currency equivalent — follows the merchant's chosen currency
+  // Local-currency equivalent - follows the merchant's chosen currency
   const CURRENCY_SYM: Record<string, string> = { NGN: "₦", GHS: "₵", KES: "KSh", ZAR: "R", USD: "$", USDC: "" };
   const localCur  = merchant.default_currency || "NGN";
   const localRate = localCur === "USDC" ? null : (rates[localCur] ?? null);
@@ -1061,7 +1061,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   const statsCards = [
     {
       label: "USDC Balance",
-      value: merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "—",
+      value: merchant.usdc_balance ? `${parseFloat(merchant.usdc_balance).toFixed(2)} USDC` : "-",
       sub: merchant.usdc_balance && localRate
         ? fmtLocal(parseFloat(merchant.usdc_balance))
         : "wallet on Arc",
@@ -1106,7 +1106,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
             </button>
           ))}
 
-          {/* Settings — collapsible dropdown */}
+          {/* Settings - collapsible dropdown */}
           <button
             onClick={() => { setSettingsOpen(o => !o); }}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -1158,7 +1158,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar (B1) — balance always visible */}
+        {/* Topbar (B1) - balance always visible */}
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-10">
           {/* mobile nav pills */}
           <div className="flex lg:hidden gap-1">
@@ -1182,14 +1182,14 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Setup guide — re-open the first-timer walkthrough anytime */}
+            {/* Setup guide - re-open the first-timer walkthrough anytime */}
             <button
               onClick={openGuide}
               title="Open the setup guide"
               className="flex items-center gap-1.5 text-xs font-semibold text-[#6c47ff] border border-[#6c47ff]/30 rounded-lg px-2.5 py-1.5 hover:bg-[#6c47ff]/5 transition-colors">
               <Sparkles className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Setup guide</span>
             </button>
-            {/* Currency flag — click to go to currency settings */}
+            {/* Currency flag - click to go to currency settings */}
             <button
               onClick={() => openSetting("currency")}
               title={`Currency: ${merchant.default_currency}`}
@@ -1213,7 +1213,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
         <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           <div className="max-w-5xl mx-auto space-y-6">
 
-            {/* identity banner — Arc theme */}
+            {/* identity banner - Arc theme */}
             <div className="arc-panel rounded-2xl px-5 py-4 flex items-center justify-between gap-4 overflow-hidden">
               <div className="min-w-0">
                 <p className="arc-kicker text-[10px] font-medium mb-1">{`{ ${activeView === "home" ? "MERCHANT" : activeView.toUpperCase()} }`}</p>
@@ -1301,7 +1301,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               {/* Chart + Your tools */}
               <div className="grid lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2">
-                  <CardHeader><h3 className="font-semibold">Revenue — last 7 days (USDC)</h3></CardHeader>
+                  <CardHeader><h3 className="font-semibold">Revenue - last 7 days (USDC)</h3></CardHeader>
                   <CardBody className="h-52">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -1352,7 +1352,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                   {payments.length === 0 ? (
                     <div className="text-center py-8 space-y-2">
                       <div className="text-3xl">💸</div>
-                      <p className="text-sm text-gray-400">No payments yet — create your first link.</p>
+                      <p className="text-sm text-gray-400">No payments yet - create your first link.</p>
                     </div>
                   ) : (
                     <div className="space-y-1">
@@ -1390,7 +1390,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <div className="relative">
                         <Search className="w-3.5 h-3.5 text-gray-300 absolute left-2.5 top-1/2 -translate-y-1/2" />
                         <input value={search} onChange={e => setSearch(e.target.value)}
-                          placeholder="Search ID / order…"
+                          placeholder="Search ID / order..."
                           className="w-40 sm:w-52 rounded-lg border border-gray-200 pl-8 pr-3 py-1.5 text-xs outline-none focus:border-[#6c47ff]" />
                       </div>
                       <Button size="sm" variant="outline" onClick={exportCsv} disabled={exporting || paymentList.total === 0}>
@@ -1455,7 +1455,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                                 {localRate && <span className="block text-xs text-gray-400">{localSym}{Math.round(p.amount / 1e6 * localRate).toLocaleString()}</span>}
                               </td>
                               <td className="px-6 py-3"><StatusBadge status={p.status} /></td>
-                              <td className="px-6 py-3 font-mono text-xs text-gray-400">{p.payer ? trunc(p.payer) : "—"}</td>
+                              <td className="px-6 py-3 font-mono text-xs text-gray-400">{p.payer ? trunc(p.payer) : "-"}</td>
                               <td className="px-6 py-3 text-xs text-gray-400">{new Date(p.created_at + " UTC").toLocaleString()}</td>
                               <td className="px-6 py-3 whitespace-nowrap">
                                 {p.tx_hash ? (
@@ -1473,7 +1473,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     </div>
                     {(paymentList.has_more || page > 1) && (
                       <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 text-xs text-gray-500">
-                        <span>{(page - 1) * paymentList.limit + 1}–{Math.min(page * paymentList.limit, paymentList.total)} of {paymentList.total}</span>
+                        <span>{(page - 1) * paymentList.limit + 1}-{Math.min(page * paymentList.limit, paymentList.total)} of {paymentList.total}</span>
                         <div className="flex gap-2">
                           <button onClick={() => { const p = page - 1; setPage(p); refresh(statusFilter, p); }} disabled={page === 1}
                             className="px-3 py-1 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50">← Prev</button>
@@ -1536,19 +1536,19 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <div className="relative">
                         <Wallet className="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input value={profileWallet} onChange={e => setProfileWallet(e.target.value)}
-                          placeholder="0xD4F3…7b87"
+                          placeholder="0xD4F3...7b87"
                           className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2.5 text-sm font-mono outline-none focus:border-[#6c47ff]" />
                       </div>
                       {profileWallet && !/^0x[0-9a-fA-F]{40}$/.test(profileWallet) && (
                         <p className="text-xs text-red-500 mt-1">Invalid wallet address</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-1">USDC settles here — connect MetaMask to fill it. ArcPay never holds your funds.</p>
+                      <p className="text-xs text-gray-400 mt-1">USDC settles here - connect MetaMask to fill it. ArcPay never holds your funds.</p>
                     </div>
                     {profileMsg && (
                       <p className={`text-xs ${profileMsg.includes("✓") ? "text-green-700" : "text-red-600"}`}>{profileMsg}</p>
                     )}
                     <Button className="w-full" onClick={saveProfile} disabled={profileSaving}>
-                      {profileSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save changes"}
+                      {profileSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Save changes"}
                     </Button>
                   </CardBody>
                 </Card>
@@ -1589,7 +1589,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <p className={`text-xs ${passMsg.includes("✓") ? "text-green-700" : "text-red-600"}`}>{passMsg}</p>
                     )}
                     <Button className="w-full" onClick={savePassword} disabled={passSaving}>
-                      {passSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating…</> : "Change password"}
+                      {passSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</> : "Change password"}
                     </Button>
                   </CardBody>
                 </Card>
@@ -1602,7 +1602,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                   <CardBody className="space-y-3">
                     {newKey ? (
                       <>
-                        <p className="text-xs text-green-700 bg-green-50 rounded-lg p-2">New key issued — copy it now, it won't be shown again.</p>
+                        <p className="text-xs text-green-700 bg-green-50 rounded-lg p-2">New key issued - copy it now, it won't be shown again.</p>
                         <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-2 text-xs font-mono break-all">
                           <span className="flex-1">{newKey}</span>
                           <button onClick={() => copyKey(newKey)} className="shrink-0">
@@ -1713,7 +1713,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       const sample = ({ NGN: 4500, GHS: 50, KES: 500, ZAR: 80, USD: 5 } as Record<string, number>)[localCur] ?? 4500;
                       return (
                         <div className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2.5 text-xs space-y-1.5">
-                          <p className="font-semibold text-gray-600">Live preview — {localSym}{sample.toLocaleString()} item</p>
+                          <p className="font-semibold text-gray-600">Live preview - {localSym}{sample.toLocaleString()} item</p>
                           <p className="text-gray-500">No markup: <span className="font-mono">{(sample / localRate).toFixed(2)} USDC</span></p>
                           <p className="text-[#6c47ff] font-medium">With {(markupBps/100).toFixed(1)}%: <span className="font-mono">{(sample * (1 + markupBps/10000) / localRate).toFixed(2)} USDC</span></p>
                           <p className="text-gray-400">Buffer goes to your wallet on off-ramp.</p>
@@ -1722,7 +1722,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     })()}
                     {markupMsg && <p className={`text-xs ${markupMsg.includes("fail") ? "text-red-600" : "text-green-700"}`}>{markupMsg}</p>}
                     <Button className="w-full" onClick={saveMarkup} disabled={markupSaving}>
-                      {markupSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save markup"}
+                      {markupSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Save markup"}
                     </Button>
                   </CardBody>
                 </Card>

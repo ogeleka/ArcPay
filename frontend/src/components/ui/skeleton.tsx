@@ -7,7 +7,7 @@ export function Skeleton({ className }: { className?: string }) {
 // Column widths as Tailwind classes so we avoid inline style prop issues
 const COL_WIDTHS = ["w-28", "w-20", "w-16", "w-24", "w-28", "w-10"];
 
-/** Full payments-table skeleton — matches the real table column layout */
+/** Full payments-table skeleton - matches the real table column layout */
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="overflow-hidden">
