@@ -124,7 +124,7 @@ export default function Demo() {
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Try the demo</h1>
         <p className="text-gray-500 max-w-md mx-auto">
-          Four steps to make a real on-chain payment through the Footie Lagos demo store - takes about 3 minutes.
+          Four steps to make a real on-chain payment through the Footie Dubai demo store - takes about 3 minutes.
         </p>
       </div>
 
@@ -220,7 +220,7 @@ export default function Demo() {
         </Step>
 
         {/* Step 4 - Try the real Footie store */}
-        <Step n={4} title="Open Footie Lagos and buy a shoe" subtitle="Pick a shoe, pay with USDC - watch it settle in under a second">
+        <Step n={4} title="Open Footie Dubai and buy a shoe" subtitle="Pick a shoe, pay with USDC - watch it settle in under a second">
           <p className="text-sm text-gray-500">
             You're ready. Click a shoe, log in (or register quickly), go to checkout,
             and click "Pay with ArcPay". Approve in MetaMask and the payment settles on-chain in under a second.
@@ -233,7 +233,7 @@ export default function Demo() {
                 ["Approve",    "You allow the ArcPay contract to spend your USDC"],
                 ["Pay",        "USDC splits instantly - merchant gets 99.5%, 0.5% protocol fee"],
                 ["Webhook",    "ArcPay fires a signed webhook - Footie confirms the order"],
-                ["Done ✅",    "You land back on Footie Lagos with your order confirmed"],
+                ["Done ✅",    "You land back on Footie Dubai with your order confirmed"],
               ].map(([label, desc]) => (
                 <div key={label} className="flex gap-2">
                   <span className="font-semibold text-[#6c47ff] w-24 shrink-0">{label}</span>
@@ -244,7 +244,7 @@ export default function Demo() {
           </div>
           <a href={STORE_URL} target="_blank" rel="noreferrer" className="block">
             <Button className="w-full" size="lg">
-              Open Footie Lagos store <ExternalLink className="w-4 h-4 ml-2" />
+              Open Footie Dubai store <ExternalLink className="w-4 h-4 ml-2" />
             </Button>
           </a>
           <a href="/shop/" target="_blank" rel="noreferrer" className="block">

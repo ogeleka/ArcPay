@@ -559,7 +559,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                   <>
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 mb-1.5">Business / Name <span className="text-red-400">*</span></label>
-                      <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Footie Lagos" className={inputCls} autoFocus />
+                      <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Footie Dubai" className={inputCls} autoFocus />
                     </div>
 
                     <div>
@@ -1516,7 +1516,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 mb-1.5">Business / Name</label>
                       <input value={profileName} onChange={e => setProfileName(e.target.value)}
-                        placeholder="e.g. Footie Lagos"
+                        placeholder="e.g. Footie Dubai"
                         className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#6c47ff]" />
                     </div>
                     <div>

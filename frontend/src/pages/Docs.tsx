@@ -137,7 +137,7 @@ export default function Docs() {
             cURL: `curl -X POST ${API_BASE}/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
-    "name": "Footie Lagos",
+    "name": "Footie Dubai",
     "email": "hello@footie.ng",
     "password": "a-strong-password",
     "wallet_address": "0xYourWalletAddress",
@@ -150,7 +150,7 @@ export default function Docs() {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    name: 'Footie Lagos',
+    name: 'Footie Dubai',
     email: 'hello@footie.ng',
     password: 'a-strong-password',
     wallet_address: '0xYourWalletAddress',
@@ -412,7 +412,7 @@ await arcpay.checkout({ amount: 4500, currency: 'NGN', orderId: 'FOOTIE-1021' })
         {/* Footie walkthrough */}
         <Section id="footie" title="Footie Store - Full Walkthrough">
           <p>
-            Footie Lagos sells premium sneakers priced in Naira. Here's the exact integration
+            Footie Dubai sells premium sneakers priced in Dirhams. Here's the exact integration
             that powers the <a href="/demo" className="text-[#6c47ff] underline">live demo</a>.
           </p>
 

@@ -38,8 +38,8 @@ app.post('/buy', async (req, res) => {
       'X-Api-Key': process.env.ARCPAY_API_KEY,
     },
     body: JSON.stringify({
-      amount:       product.price_ngn,  // price in Naira
-      currency:     'NGN',
+      amount:       product.price,  // price in AED
+      currency:     'AED',
       order_id:     orderId,
       callback_url: STORE_URL + '/orders/' + orderId,
     }),
@@ -71,9 +71,9 @@ app.post('/arcpay/webhook',
 
 // our little catalogue
 const PRODUCTS = [
-  { id: "lagos-runner",     name: "Lagos Runner",           price_ngn: 4500, emoji: "👟", desc: "Lightweight mesh, built for the city grind." },
-  { id: "eko-slide",        name: "Eko Slide",              price_ngn: 2800, emoji: "🩴", desc: "All-day comfort, island style." },
-  { id: "vi-hightop",       name: "Victoria Island Hi-Top", price_ngn: 6200, emoji: "👢", desc: "Statement fit for the mainland flex." },
+  { id: "dubai-runner",   name: "Dubai Runner",    price: 15, emoji: "👟", desc: "Lightweight mesh, built for the city grind." },
+  { id: "marina-slide",   name: "Marina Slide",    price: 10, emoji: "🩴", desc: "All-day comfort, beachfront style." },
+  { id: "downtown-hitop", name: "Downtown Hi-Top", price: 22, emoji: "👢", desc: "Statement fit for the skyline." },
 ];
 
 // just hold orders in memory. it's a demo, restart and they're gone, no big deal
@@ -91,7 +91,7 @@ function shell(title, body, opts = {}) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title} - Footie Lagos</title>
+  <title>${title} - Footie Dubai</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -251,7 +251,7 @@ function shell(title, body, opts = {}) {
 <body>
   <header>
     <span>👟</span>
-    <h1>Footie Lagos</h1>
+    <h1>Footie Dubai</h1>
     ${opts.wallet ? `<button id="wallet-btn" class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>` : ""}
   </header>
   <main class="${opts.wide ? "wide" : ""}">${body}</main>
@@ -304,7 +304,7 @@ app.get(BASE, (req, res) => {
       <div class="emoji">${p.emoji}</div>
       <h2>${p.name}</h2>
       <p>${p.desc}</p>
-      <div class="price">₦${p.price_ngn.toLocaleString()}</div>
+      <div class="price">AED ${p.price.toLocaleString()}</div>
       <button class="btn" onclick="openPay('${p.id}')">Pay with USDC (ArcPay)</button>
     </div>`).join("");
 
@@ -351,7 +351,7 @@ app.get(BASE, (req, res) => {
 
       <!-- the shop + the live payments table -->
       <div>
-        <p class="col-title">🛍️ Footie Lagos store</p>
+        <p class="col-title">🛍️ Footie Dubai store</p>
         <p class="intro">Fresh kicks, paid in stable dollars. Instant settlement, no middleman. Connect a wallet up top, then buy a pair - checkout opens right here.</p>
         <div class="shoe-grid">${cards}</div>
 
@@ -474,7 +474,7 @@ app.get(BASE, (req, res) => {
           return '<tr>' +
             '<td class="oid">' + o.id.slice(0,8) + '...</td>' +
             '<td>' + o.emoji + ' ' + o.product + '</td>' +
-            '<td class="amt">₦' + o.price_ngn.toLocaleString() + usdLabel(o) + '</td>' +
+            '<td class="amt">AED ' + o.price.toLocaleString() + usdLabel(o) + '</td>' +
             '<td>' + badge(o.status) + '</td>' +
             '<td class="time">' + fmtTime(o.created_at) + '</td>' +
             '<td>' + last + '</td>' +
@@ -611,8 +611,8 @@ app.post(`${BASE}/buy`, async (req, res) => {
         "X-Api-Key": API_KEY,
       },
       body: JSON.stringify({
-        amount:       product.price_ngn,
-        currency:     "NGN",
+        amount:       product.price,
+        currency:     "AED",
         order_id:     orderId,
         callback_url: `${STORE_URL}/orders/${orderId}`,
         metadata:     { product: product.id, store: "footie-lagos" },
@@ -648,7 +648,7 @@ app.post(`${BASE}/buy`, async (req, res) => {
   // what to show in dollars: use arcpay's number, or fall back to price / rate
   const usd = paymentData.amount_usdc != null
     ? Number(paymentData.amount_usdc) / 1e6
-    : (paymentData.rate ? product.price_ngn / paymentData.rate : null);
+    : (paymentData.rate ? product.price / paymentData.rate : null);
 
   orders.set(orderId, {
     id:         orderId,
@@ -674,7 +674,7 @@ app.get(`${BASE}/api/orders`, (req, res) => {
       status:     o.status,
       product:    o.product.name,
       emoji:      o.product.emoji,
-      price_ngn:  o.product.price_ngn,
+      price:  o.product.price,
       usd:        o.usd != null ? o.usd : null,
       created_at: o.created_at,
       tx_hash:    o.tx_hash || null,
@@ -716,7 +716,7 @@ app.get(`${BASE}/orders/:id`, (req, res) => {
     <div class="status-box">
       <div class="icon">${order.product.emoji}</div>
       <h2>${order.product.name}</h2>
-      <p style="font-size:1.1rem;font-weight:600;color:#1a1a1a">₦${order.product.price_ngn.toLocaleString()}</p>
+      <p style="font-size:1.1rem;font-weight:600;color:#1a1a1a">AED ${order.product.price.toLocaleString()}</p>
       <div style="margin:.75rem 0">${statusBlock}</div>
       <p id="msg">${message}</p>
       <div class="meta">Order ID: ${order.id}</div>
@@ -779,7 +779,7 @@ app.post(`${BASE}/arcpay/webhook`, (req, res) => {
 
 // off we go
 app.listen(PORT, () => {
-  console.log(`\n👟  Footie Lagos running at http://localhost:${PORT}${BASE}`);
+  console.log(`\n👟  Footie Dubai running at http://localhost:${PORT}${BASE}`);
   console.log(`    ArcPay backend: ${ARCPAY_URL}`);
   if (!API_KEY || !WH_SECRET) {
     console.warn("    ⚠️  ARCPAY_API_KEY / ARCPAY_WEBHOOK_SECRET not set - copy .env.example to .env\n");

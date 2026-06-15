@@ -10,7 +10,7 @@ const DEMO_STEPS = [
     label: "Customer scans QR",
     ui: (
       <div className="space-y-3 text-center">
-        <p className="text-xs text-gray-400 font-medium">Footie Lagos · Air Force 1</p>
+        <p className="text-xs text-gray-400 font-medium">Footie Dubai · Air Force 1</p>
         <div className="text-3xl font-bold text-gray-900">₦45,000</div>
         <p className="text-sm text-gray-400">≈ 29.03 USDC · rate locked</p>
         {/* Mini QR */}
@@ -30,7 +30,7 @@ const DEMO_STEPS = [
     label: "Approve & pay",
     ui: (
       <div className="space-y-4 text-center">
-        <p className="text-xs text-gray-400 font-medium">Footie Lagos · Air Force 1</p>
+        <p className="text-xs text-gray-400 font-medium">Footie Dubai · Air Force 1</p>
         <div className="text-3xl font-bold text-gray-900">29.03 USDC</div>
         <div className="space-y-2">
           <div className="flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 text-xs text-green-700">
@@ -415,7 +415,7 @@ export default function Landing() {
             <a href={import.meta.env.VITE_STORE_URL ?? "http://localhost:3100"}
               target="_blank" rel="noreferrer"
               className="rounded-xl border border-white/30 text-white font-semibold px-6 h-12 inline-flex items-center hover:bg-white/10 transition-colors">
-              See Footie Lagos demo ↗
+              See Footie Dubai demo ↗
             </a>
           </div>
         </div>
@@ -431,7 +431,7 @@ export default function Landing() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">See a real payment in under 3 minutes</h2>
               <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                Two ways to try it. The guided walkthrough takes you through the Footie Lagos store step by step, or jump straight into the full shop - a complete e-commerce store with accounts, a cart, and ArcPay checkout.
+                Two ways to try it. The guided walkthrough takes you through the Footie Dubai store step by step, or jump straight into the full shop - a complete e-commerce store with accounts, a cart, and ArcPay checkout.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/demo">
@@ -446,7 +446,7 @@ export default function Landing() {
               {[
                 { n: "1", label: "Add Arc testnet to MetaMask",       sub: "One click - we fill in the details" },
                 { n: "2", label: "Claim free test USDC from faucet",  sub: "Takes about 10 seconds to arrive"   },
-                { n: "3", label: "Buy a shoe on Footie Lagos",        sub: "Real checkout, real on-chain tx"    },
+                { n: "3", label: "Buy a shoe on Footie Dubai",        sub: "Real checkout, real on-chain tx"    },
                 { n: "4", label: "Watch it settle in under 1 second", sub: "Sub-second finality on Arc"         },
               ].map(({ n, label, sub }) => (
                 <div key={n} className="flex items-center gap-4 rounded-xl bg-gray-50 px-4 py-3">
