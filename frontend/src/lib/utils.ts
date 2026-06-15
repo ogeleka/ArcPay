@@ -11,10 +11,21 @@ export function fmtUsdc(baseUnits: bigint | number | string): string {
   return (Number(baseUnits) / 1_000_000).toFixed(2) + " USDC";
 }
 
-/** Whole NGN → "₦4,500" */
+/** Symbol for each supported pricing currency */
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  NGN: "₦", GHS: "₵", KES: "KSh", ZAR: "R", AED: "AED", USD: "$", USDC: "",
+};
+
+/** Whole local amount → "₦4,500" / "AED 367" etc. (symbol chosen by currency) */
+export function fmtLocal(amount: number | null | undefined, currency = "NGN"): string {
+  if (amount == null) return "";
+  const sym = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+  return sym + amount.toLocaleString();
+}
+
+/** Whole NGN → "₦4,500" (kept for backwards compatibility) */
 export function fmtNgn(ngn: number | null | undefined): string {
-  if (ngn == null) return "";
-  return "₦" + ngn.toLocaleString("en-NG");
+  return fmtLocal(ngn, "NGN");
 }
 
 /** Seconds remaining until a date string */

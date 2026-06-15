@@ -33,7 +33,7 @@ function signToken(merchantId) {
 }
 
 // POST /auth/register
-const SUPPORTED_CURRENCIES = new Set(["NGN", "GHS", "ZAR", "KES", "USD", "USDC"]);
+const SUPPORTED_CURRENCIES = new Set(["NGN", "GHS", "ZAR", "KES", "AED", "USD", "USDC"]);
 
 router.post("/register", async (req, res, next) => {
   try {

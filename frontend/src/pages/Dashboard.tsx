@@ -303,6 +303,7 @@ const COUNTRIES = [
   { code: "GH", flag: "🇬🇭", name: "Ghana",        currency: "GHS", symbol: "₵"   },
   { code: "KE", flag: "🇰🇪", name: "Kenya",        currency: "KES", symbol: "KSh" },
   { code: "ZA", flag: "🇿🇦", name: "South Africa", currency: "ZAR", symbol: "R"   },
+  { code: "AE", flag: "🇦🇪", name: "United Arab Emirates", currency: "AED", symbol: "AED" },
 ];
 
 const EXPLORER = "https://testnet.arcscan.app";
@@ -1052,7 +1053,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
   })();
 
   // Local-currency equivalent - follows the merchant's chosen currency
-  const CURRENCY_SYM: Record<string, string> = { NGN: "₦", GHS: "₵", KES: "KSh", ZAR: "R", USD: "$", USDC: "" };
+  const CURRENCY_SYM: Record<string, string> = { NGN: "₦", GHS: "₵", KES: "KSh", ZAR: "R", AED: "AED", USD: "$", USDC: "" };
   const localCur  = merchant.default_currency || "NGN";
   const localRate = localCur === "USDC" ? null : (rates[localCur] ?? null);
   const localSym  = CURRENCY_SYM[localCur] ?? "";
@@ -1195,7 +1196,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               title={`Currency: ${merchant.default_currency}`}
               className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition-colors">
               <span className="text-base leading-none">
-                {{"NGN":"🇳🇬","GHS":"🇬🇭","KES":"🇰🇪","ZAR":"🇿🇦","USD":"🇺🇸","USDC":"💵"}[merchant.default_currency] ?? "💱"}
+                {{"NGN":"🇳🇬","GHS":"🇬🇭","KES":"🇰🇪","ZAR":"🇿🇦","AED":"🇦🇪","USD":"🇺🇸","USDC":"💵"}[merchant.default_currency] ?? "💱"}
               </span>
               <span className="font-semibold">{merchant.default_currency}</span>
             </button>
@@ -1696,7 +1697,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <select value={merchant.default_currency}
                         onChange={e => saveCurrency(e.target.value)}
                         className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#6c47ff] bg-white cursor-pointer">
-                        {["NGN","GHS","KES","ZAR","USDC"].map(c => <option key={c} value={c}>{c}</option>)}
+                        {["NGN","GHS","KES","ZAR","AED","USDC"].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
@@ -1710,7 +1711,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <div className="flex justify-between text-[10px] text-gray-300 mt-1"><span>0%</span><span>5% max</span></div>
                     </div>
                     {localRate && markupBps > 0 && (() => {
-                      const sample = ({ NGN: 4500, GHS: 50, KES: 500, ZAR: 80, USD: 5 } as Record<string, number>)[localCur] ?? 4500;
+                      const sample = ({ NGN: 4500, GHS: 50, KES: 500, ZAR: 80, AED: 18, USD: 5 } as Record<string, number>)[localCur] ?? 4500;
                       return (
                         <div className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2.5 text-xs space-y-1.5">
                           <p className="font-semibold text-gray-600">Live preview - {localSym}{sample.toLocaleString()} item</p>

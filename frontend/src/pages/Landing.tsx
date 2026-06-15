@@ -137,6 +137,7 @@ const COUNTRIES = [
   { flag: "🇬🇭", country: "Ghana",        code: "GHS", symbol: "₵",   currency: "Cedi" },
   { flag: "🇰🇪", country: "Kenya",        code: "KES", symbol: "KSh", currency: "Shilling" },
   { flag: "🇿🇦", country: "South Africa", code: "ZAR", symbol: "R",   currency: "Rand" },
+  { flag: "🇦🇪", country: "United Arab Emirates", code: "AED", symbol: "AED", currency: "Dirham" },
 ];
 
 type RateMap = Record<string, { rate: number | null; stale: boolean }>;

@@ -15,6 +15,7 @@ export const SUPPORTED = {
   GHS: { name: "Ghanaian Cedi",     symbol: "₵",   fallbackEnv: "GHS_FALLBACK_RATE" },
   KES: { name: "Kenyan Shilling",   symbol: "KSh", fallbackEnv: "KES_FALLBACK_RATE" },
   ZAR: { name: "South African Rand",symbol: "R",   fallbackEnv: "ZAR_FALLBACK_RATE" },
+  AED: { name: "UAE Dirham",        symbol: "AED", fallbackEnv: "AED_FALLBACK_RATE" },
   USD: { name: "US Dollar",         symbol: "$",   fallbackEnv: "USD_FALLBACK_RATE" },
 };
 

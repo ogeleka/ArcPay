@@ -11,7 +11,7 @@ import { CheckCircle, Clock, QrCode, Loader2, AlertCircle, CreditCard, Info } fr
 import { getPayment, type PaymentDetails } from "@/lib/api";
 import { arcTestnet, USDC_ADDRESS } from "@/lib/chain";
 import { ARCPAY_ABI, USDC_ABI } from "@/lib/contracts";
-import { fmtUsdc, fmtNgn, secondsUntil } from "@/lib/utils";
+import { fmtUsdc, fmtLocal, CURRENCY_SYMBOLS, secondsUntil } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 
@@ -289,7 +289,7 @@ export default function Checkout() {
               </p>
               <p className="text-5xl font-bold text-gray-900">{fmtUsdc(payment.amount)}</p>
               {payment.amount_ngn && (
-                <p className="text-gray-400 text-sm mt-1">{fmtNgn(payment.amount_ngn)}</p>
+                <p className="text-gray-400 text-sm mt-1">{fmtLocal(payment.amount_ngn, payment.currency)}</p>
               )}
             </div>
 
@@ -301,11 +301,11 @@ export default function Checkout() {
                 </p>
                 <div className="flex justify-between text-gray-500">
                   <span>Local price</span>
-                  <span className="font-mono">{fmtNgn(payment.amount_ngn)}</span>
+                  <span className="font-mono">{fmtLocal(payment.amount_ngn, payment.currency)}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Mid-market rate</span>
-                  <span className="font-mono">1 USDC = ₦{payment.mid_rate.toLocaleString()}</span>
+                  <span className="font-mono">1 USDC = {CURRENCY_SYMBOLS[payment.currency] ?? payment.currency}{payment.mid_rate.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>Merchant FX buffer</span>
@@ -456,7 +456,7 @@ export default function Checkout() {
           </p>
           <div className="text-[10px] text-gray-300 text-center space-y-0.5">
             <p>Rate locked at creation</p>
-            {payment.mid_rate && <p>1 USDC = ₦{payment.mid_rate.toLocaleString()}</p>}
+            {payment.mid_rate && <p>1 USDC = {CURRENCY_SYMBOLS[payment.currency] ?? payment.currency}{payment.mid_rate.toLocaleString()}</p>}
             {payment.markup_bps > 0 && (
               <p className="text-gray-400">+{(payment.markup_bps / 100).toFixed(1)}% FX buffer included</p>
             )}

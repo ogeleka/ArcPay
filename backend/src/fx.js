@@ -11,6 +11,7 @@ const CURRENCIES = {
   GHS: { symbol: "₵", name: "Ghanaian Cedi",    fallbackEnv: "GHS_FALLBACK_RATE" },
   KES: { symbol: "KSh", name: "Kenyan Shilling", fallbackEnv: "KES_FALLBACK_RATE" },
   ZAR: { symbol: "R",  name: "South African Rand", fallbackEnv: "ZAR_FALLBACK_RATE" },
+  AED: { symbol: "AED", name: "UAE Dirham", fallbackEnv: "AED_FALLBACK_RATE" },
   USD: { symbol: "$",  name: "US Dollar",          fallbackEnv: "USD_FALLBACK_RATE" },
 };
 
