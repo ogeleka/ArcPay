@@ -315,7 +315,7 @@ export default function Landing() {
                   <div className="rounded-lg bg-gray-50 px-3 py-2 text-center">
                     {r?.rate ? (
                       <p className="text-sm font-mono font-semibold text-gray-900">
-                        1 USDC = {c.symbol}{Math.round(r.rate).toLocaleString()}
+                        1 USDC = {c.symbol}{r.rate >= 100 ? Math.round(r.rate).toLocaleString() : r.rate.toFixed(2)}
                       </p>
                     ) : (
                       <p className="text-sm text-gray-300">rate loading...</p>
