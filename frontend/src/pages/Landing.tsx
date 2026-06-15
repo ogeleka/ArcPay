@@ -184,11 +184,11 @@ export default function Landing() {
               <p className="arc-kicker text-xs sm:text-sm font-medium mb-6">{"{ USDC PAYMENTS ON ARC }"}</p>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white leading-[0.98] mb-6">
                 Dollar-stable payments<br />
-                for Africa and the world.
+                for Africa, the Gulf and beyond.
               </h1>
               <p className="text-lg sm:text-xl text-blue-100/80 leading-relaxed mb-9 max-w-lg mx-auto lg:mx-0">
                 Settlement in under a second. No FX risk. No gateway holding your money.
-                Accept USDC natively - in naira, cedis, rand, shillings, or straight dollars.
+                Accept USDC natively - in naira, cedis, shillings, rand, dirhams, or straight dollars.
                 Your currency, your choice.
               </p>
               {/* phone mockup - shown here on mobile, in the right column on desktop */}
@@ -232,7 +232,7 @@ export default function Landing() {
             ["⚡", "< 1s finality"],
             ["💵", "0.5% flat fee"],
             ["🔒", "Non-custodial"],
-            ["🌍", "4 local currencies"],
+            ["🌍", "5 local currencies"],
             ["🛡️", "Signed webhooks"],
           ].map(([icon, text]) => (
             <span key={text} className="flex items-center gap-1.5">
@@ -296,7 +296,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {COUNTRIES.map(c => {
               const r = rates[c.code];
               const live = !!r?.rate && !r.stale;
@@ -327,7 +327,7 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-sm text-gray-400 mt-8">
-            More markets coming soon - Tanzania, Uganda, Rwanda &amp; Egypt.
+            More markets coming soon - Egypt, Saudi Arabia, India &amp; beyond.
           </p>
         </div>
       </section>
@@ -397,13 +397,13 @@ export default function Landing() {
       {/* Nigeria angle */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-20">
         <div className="arc-panel rounded-3xl text-white p-10 sm:p-14 text-center overflow-hidden relative">
-          <p className="arc-kicker text-xs font-medium mb-5">{"{ BUILT FOR AFRICA }"}</p>
+          <p className="arc-kicker text-xs font-medium mb-5">{"{ PRICE LOCAL, EARN DOLLARS }"}</p>
           <div className="text-4xl mb-4 flex items-center justify-center gap-1">
             {COUNTRIES.map(c => <span key={c.code}>{c.flag}</span>)}
           </div>
-          <h2 className="text-3xl font-bold uppercase tracking-tight mb-4">Built for African merchants</h2>
+          <h2 className="text-3xl font-bold uppercase tracking-tight mb-4">Built for merchants everywhere</h2>
           <p className="text-blue-100/80 text-lg leading-relaxed max-w-2xl mx-auto mb-8">
-            Price your goods in Naira, Cedis, Shillings or Rand. Get paid in stable dollars.
+            Price your goods in Naira, Cedis, Shillings, Rand or Dirhams. Get paid in stable dollars.
             ArcPay shows customers the local price and converts at a locked rate -
             so no one loses money to FX drift between checkout and payment.
           </p>
