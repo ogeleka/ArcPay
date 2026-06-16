@@ -108,6 +108,25 @@ Point at **Recent payments** (the new payment), the **balance**, and click **Vie
 
 ---
 
+### Act 6 - Two more ways to get paid (90s, optional but strong)
+
+**In-store / POS.** From the shop's admin menu, open **Pay in store**.
+> "Now imagine the customer is standing at the counter, not online. The cashier types the amount, a
+> QR code appears, the customer scans it with their phone wallet and pays. The screen flips to paid
+> on its own. Same rail, no card terminal, no hardware."
+
+Type an amount, show the QR, scan and pay from your phone, watch it flip to Paid.
+
+**The live dashboard.** From the admin menu, open **Live dashboard**.
+> "And the merchant watches all of it here. Total revenue, paid orders, how many came through ArcPay,
+> and a payments feed that updates every few seconds - the same live view as the ArcPay dashboard,
+> right inside their own store. This is what running on ArcPay feels like day to day."
+
+> Note: both of these are admin-only. A walk-in customer can't open the POS or the dashboard; only the
+> logged-in merchant can. Good detail to mention if anyone asks about access control.
+
+---
+
 ## IF SOMETHING GOES WRONG (live-demo safety nets)
 
 - **"Invalid API key" at checkout** -> the store didn't pick up the new key. Re-check the `.env`
@@ -137,6 +156,8 @@ Point at **Recent payments** (the new payment), the **balance**, and click **Vie
 5. **Dollar-stable gas.** USDC is Arc's native gas token, so every fee is a predictable dollar amount.
 6. **Multi-currency by config.** Naira, cedis, shillings, rand, dirhams - same rate-fetch/lock/convert
    path. Adding the dirham was a one-line change, not a rebuild.
+7. **Merchant tooling, included.** A live payments dashboard and an in-store POS (scan-to-pay) ship out
+   of the box, both built on the same create + webhook + poll primitives. Both are admin-gated.
 
 ---
 

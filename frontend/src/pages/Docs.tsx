@@ -45,6 +45,7 @@ function CodeBlock({ snippets }: { snippets: Partial<Record<Lang, string>> }) {
 
 const NAV = [
   { id: "quickstart",      label: "Quick Start" },
+  { id: "dashboard",       label: "Your dashboard" },
   { id: "auth",            label: "Authentication" },
   { id: "create-payment",  label: "Create a Payment" },
   { id: "ngn",             label: "Local currencies" },
@@ -227,6 +228,32 @@ def webhook():
         pass  # mark order paid
     return '', 200`,
           }} />
+        </Section>
+
+        {/* Dashboard */}
+        <Section id="dashboard" title="Your dashboard">
+          <p>
+            The <a href="/dashboard" className="text-[#6c47ff] underline">dashboard</a> is where you sign up,
+            get your keys, wire ArcPay into your app, and watch payments land in real time. Connecting it
+            is three steps - no code needed to get set up.
+          </p>
+
+          <H3>Connect in 3 steps</H3>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li><strong>Sign up and connect your wallet</strong> - that's where your USDC settles. You get an
+              {" "}<InlineCode>api_key</InlineCode> and a <InlineCode>webhook_secret</InlineCode>, shown once. Copy both.</li>
+            <li><strong>Add the key to your server.</strong> Put the <InlineCode>api_key</InlineCode> in your backend
+              environment and send it as <InlineCode>X-Api-Key</InlineCode> on every request. Never put it in browser code.</li>
+            <li><strong>Set your webhook URL</strong> under <em>Settings -&gt; Webhook</em>, pointing at your server's
+              endpoint, then hit <em>Send test</em> to confirm a signed event arrives.</li>
+          </ol>
+
+          <H3>What you see once connected</H3>
+          <p>
+            Your <strong>live USDC balance</strong>, today's volume, total payments, and a <strong>real-time payments
+            feed</strong> - every payment shows up the moment it settles on-chain. From Settings you can also rotate your
+            API key, set an FX markup, and choose your default pricing currency.
+          </p>
         </Section>
 
         {/* Auth */}
