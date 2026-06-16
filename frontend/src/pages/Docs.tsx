@@ -47,9 +47,10 @@ const NAV = [
   { id: "quickstart",      label: "Quick Start" },
   { id: "auth",            label: "Authentication" },
   { id: "create-payment",  label: "Create a Payment" },
-  { id: "ngn",             label: "NGN Payments" },
+  { id: "ngn",             label: "Local currencies" },
   { id: "webhooks",        label: "Webhooks" },
   { id: "verify",          label: "Verify a Payment" },
+  { id: "pos",             label: "In-person (POS)" },
   { id: "sdk",             label: "JS / TS SDK" },
   { id: "footie",          label: "Footie Walkthrough ⭐" },
   { id: "errors",          label: "Errors" },
@@ -253,8 +254,8 @@ def webhook():
             </tr></thead>
             <tbody>
               {[
-                ["amount",         "number",  "✓", "USDC micro-units (1 USDC = 1 000 000) or whole NGN"],
-                ["currency",       "string",  "",  '"USDC" (default) or "NGN"'],
+                ["amount",         "number",  "✓", "USDC micro-units (1 USDC = 1 000 000), or whole units of a local currency"],
+                ["currency",       "string",  "",  '"USDC" (default), or a local code: "NGN" / "GHS" / "KES" / "ZAR" / "AED"'],
                 ["order_id",       "string",  "",  "Your internal order reference"],
                 ["customer_email", "string",  "",  "Customer email for records"],
                 ["callback_url",   "string",  "",  "Included in the webhook payload"],
@@ -286,11 +287,15 @@ def webhook():
           }} />
         </Section>
 
-        {/* NGN */}
-        <Section id="ngn" title="NGN Payments">
+        {/* Local currencies */}
+        <Section id="ngn" title="Local-currency payments">
           <p>
-            Pass <InlineCode>currency: "NGN"</InlineCode> and an <InlineCode>amount</InlineCode> in <strong>whole Naira</strong>.
-            ArcPay converts to USDC at the live rate (locked at creation) so the amount can't drift during checkout.
+            Price in your customers' currency, settle in dollars. Pass a local <InlineCode>currency</InlineCode>
+            {" "}(<InlineCode>NGN</InlineCode>, <InlineCode>GHS</InlineCode>, <InlineCode>KES</InlineCode>,
+            {" "}<InlineCode>ZAR</InlineCode> or <InlineCode>AED</InlineCode>) and an <InlineCode>amount</InlineCode> in
+            {" "}<strong>whole local units</strong>. ArcPay converts to USDC at the live mid-market rate, locked at
+            creation, so the amount can't drift during checkout. The example below uses NGN; swap the code for any
+            supported currency and the flow is identical.
           </p>
           <CodeBlock snippets={{
             cURL: `curl -X POST ${API_BASE}/payments \\
@@ -316,7 +321,7 @@ def webhook():
     json={"amount": 4500, "currency": "NGN", "order_id": "FOOTIE-1021"},
 )`,
           }} />
-          <p>The checkout page shows <strong>both</strong> the NGN price and the USDC equivalent with the locked rate.</p>
+          <p>The checkout page shows <strong>both</strong> the local price and the USDC equivalent with the locked rate.</p>
         </Section>
 
         {/* Webhooks */}
@@ -379,6 +384,40 @@ assert p["status"] == "paid", "Do not ship"`,
           }} />
         </Section>
 
+        {/* In-person / POS */}
+        <Section id="pos" title="In-person payments (POS)">
+          <p>
+            Selling face to face? There's no special endpoint - it's just <strong>create + poll</strong>.
+            The cashier enters an amount, you render the <InlineCode>payment_url</InlineCode> as a QR code,
+            and the customer scans it with any wallet and pays on the spot. No card reader, no terminal.
+          </p>
+
+          <H3>1. Create the payment and show a QR</H3>
+          <CodeBlock snippets={{
+            Node: `// cashier types an amount
+const { payment_url } = await arcpay.createPayment({ amount: 4500, currency: 'NGN' });
+
+// turn the URL into a QR the customer scans (any QR library works)
+const qr = \`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=\${encodeURIComponent(payment_url)}\`;
+showOnScreen(qr);`,
+          }} />
+
+          <H3>2. Poll until it's paid, then flip the screen</H3>
+          <CodeBlock snippets={{
+            Node: `const timer = setInterval(async () => {
+  const p = await fetch(\`${API_BASE}/payments/\${payment_id}\`, {
+    headers: { 'X-Api-Key': process.env.ARCPAY_KEY },
+  }).then(r => r.json());
+  if (p.status === 'paid') { clearInterval(timer); showPaidScreen(); }
+}, 2500);`,
+          }} />
+
+          <p>
+            That's the entire point-of-sale flow. See it running in the
+            {" "}<a href="/shop/pos" className="text-[#6c47ff] underline">shop's POS screen</a>.
+          </p>
+        </Section>
+
         {/* SDK */}
         <Section id="sdk" title="JS / TS SDK">
           <p>Import the typed SDK in your Node or browser code:</p>
@@ -427,8 +466,8 @@ app.post('/checkout', async (req, res) => {
     method: 'POST',
     headers: { 'X-Api-Key': process.env.ARCPAY_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      amount:        product.price_ngn,   // e.g. 45000 for ₦45,000
-      currency:      'NGN',
+      amount:        product.price,   // e.g. 15 for AED 15
+      currency:      'AED',
       order_id:      \`FOOTIE-\${product.id}\`,
       customer_email: customerEmail,
       callback_url:  'https://footie.ng/orders',
@@ -442,7 +481,7 @@ app.post('/checkout', async (req, res) => {
 
           <H3>Step 2 - Customer pays on ArcPay checkout</H3>
           <p>
-            Customer sees "₦45,000 · 29.03 USDC" and the locked rate. They connect MetaMask,
+            Customer sees "AED 15 · 4.08 USDC" and the locked rate. They connect MetaMask,
             approve USDC, and pay in one tap. Funds go straight to Footie's wallet - ArcPay never holds the money.
           </p>
 
