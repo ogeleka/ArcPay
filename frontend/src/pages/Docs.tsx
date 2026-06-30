@@ -49,6 +49,7 @@ const NAV = [
   { id: "auth",            label: "Authentication" },
   { id: "create-payment",  label: "Create a Payment" },
   { id: "ngn",             label: "Local currencies" },
+  { id: "currencies",      label: "Supported currencies" },
   { id: "webhooks",        label: "Webhooks" },
   { id: "verify",          label: "Verify a Payment" },
   { id: "pos",             label: "In-person (POS)" },
@@ -301,17 +302,20 @@ def webhook():
           <H3>Response</H3>
           <CodeBlock snippets={{
             Node: `{
-  "payment_id":  "0xabc123...",
-  "amount_usdc": "2903226",    // USDC base units
-  "amount_ngn":  4500,         // whole NGN (if NGN payment)
-  "rate":        1550,         // locked FX rate at creation
-  "currency":    "NGN",
-  "order_id":    "FOOTIE-1021",
-  "status":      "pending",
-  "expires_at":  "2026-06-01T22:15:00.000Z",
-  "payment_url": "${API_BASE}/checkout/0xabc123..."
+  "payment_id":   "0xabc123...",
+  "amount_usdc":  "1497678",        // USDC micro-units
+  "amount_local": 55,               // whole units of priced currency
+  "rate":         3.67,             // locked FX rate (won't drift)
+  "currency":     "AED",
+  "order_id":     "FOOTIE-1021",
+  "status":       "pending",
+  "expires_at":   "2026-06-01T22:15:00.000Z",   // payment URL valid for 30 min
+  "payment_url":  "${API_BASE}/checkout/0xabc123..."
 }`,
           }} />
+          <p className="text-amber-700 bg-amber-50 rounded-lg px-3 py-2 text-xs">
+            Payment URLs expire <strong>30 minutes</strong> after creation. Create a fresh payment if the customer returns after the window.
+          </p>
         </Section>
 
         {/* Local currencies */}
@@ -351,6 +355,35 @@ def webhook():
           <p>The checkout page shows <strong>both</strong> the local price and the USDC equivalent with the locked rate.</p>
         </Section>
 
+        {/* Supported currencies */}
+        <Section id="currencies" title="Supported currencies">
+          <p>Pass any of these codes as <InlineCode>currency</InlineCode> when creating a payment. Amounts are always in <strong>whole local units</strong> — no cents, no micro-units.</p>
+          <table className="w-full text-xs border-collapse mt-2">
+            <thead><tr className="bg-gray-50">
+              {["Currency", "Code", "Symbol", "Example amount"].map(h => (
+                <th key={h} className="text-left px-3 py-2 text-gray-500 font-semibold border border-gray-200">{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {[
+                ["Nigerian Naira",      "NGN", "₦",    '"amount": 4500  →  ₦4,500'],
+                ["Ghanaian Cedi",       "GHS", "GH₵",  '"amount": 280   →  GH₵280'],
+                ["Kenyan Shilling",     "KES", "KSh",  '"amount": 7500  →  KSh7,500'],
+                ["South African Rand",  "ZAR", "R",    '"amount": 450   →  R450'],
+                ["UAE Dirham",          "AED", "AED",  '"amount": 55    →  AED 55'],
+              ].map(([name, code, sym, ex]) => (
+                <tr key={code as string} className="border border-gray-200">
+                  <td className="px-3 py-1.5">{name}</td>
+                  <td className="px-3 py-1.5 font-mono text-[#6c47ff]">{code}</td>
+                  <td className="px-3 py-1.5">{sym}</td>
+                  <td className="px-3 py-1.5 font-mono text-gray-500">{ex}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3">To price in USDC directly, omit <InlineCode>currency</InlineCode> (defaults to <InlineCode>USDC</InlineCode>) and pass <InlineCode>amount</InlineCode> in <strong>micro-units</strong> (1 USDC = 1,000,000).</p>
+        </Section>
+
         {/* Webhooks */}
         <Section id="webhooks" title="Webhooks">
           <p>ArcPay fires a signed POST to your <InlineCode>webhook_url</InlineCode> after every on-chain event. Delivery is retried 3× (2 s, 4 s backoff).</p>
@@ -371,17 +404,17 @@ def webhook():
           <H3>Payload shape</H3>
           <CodeBlock snippets={{
             Node: `{
-  "event":       "payment.paid",
-  "payment_id":  "0xabc...",
-  "order_id":    "FOOTIE-1021",     // your reference, passed through
-  "amount_usdc": 2903226,
-  "amount_ngn":  4500,
-  "rate":        1550,
-  "currency":    "NGN",
-  "status":      "paid",
-  "payer":       "0xCustomerWallet",
-  "tx_hash":     "0xTxHash",
-  "timestamp":   "2026-06-01T21:00:00.000Z"
+  "event":        "payment.paid",
+  "payment_id":   "0xabc...",
+  "order_id":     "FOOTIE-1021",    // your reference, passed through
+  "amount_usdc":  1497678,          // USDC micro-units
+  "amount_local": 55,               // whole units of the priced currency (e.g. AED 55)
+  "rate":         3.67,             // locked FX rate at creation (local units per 1 USD)
+  "currency":     "AED",            // whatever currency was passed on creation
+  "status":       "paid",
+  "payer":        "0xCustomerWallet",
+  "tx_hash":      "0xTxHash",
+  "timestamp":    "2026-06-01T21:00:00.000Z"
 }`,
           }} />
 
@@ -440,8 +473,8 @@ showOnScreen(qr);`,
           }} />
 
           <p>
-            That's the entire point-of-sale flow. See it running in the
-            {" "}<a href="/shop/pos" className="text-[#6c47ff] underline">shop's POS screen</a>.
+            That's the entire point-of-sale flow. See it live in the
+            {" "}<a href="/demo" className="text-[#6c47ff] underline">live demo</a>.
           </p>
         </Section>
 
@@ -508,8 +541,8 @@ app.post('/checkout', async (req, res) => {
 
           <H3>Step 2 - Customer pays on ArcPay checkout</H3>
           <p>
-            Customer sees "AED 15 · 4.08 USDC" and the locked rate. They connect MetaMask,
-            approve USDC, and pay in one tap. Funds go straight to Footie's wallet - ArcPay never holds the money.
+            Customer sees the AED price and its USDC equivalent at the rate locked on creation. They connect MetaMask,
+            approve USDC, and pay in one tap. Funds go straight to Footie's wallet — ArcPay never holds the money.
           </p>
 
           <H3>Step 3 - Footie receives a webhook and ships</H3>
@@ -525,7 +558,7 @@ app.post('/checkout', async (req, res) => {
   const { event, order_id, amount_usdc, tx_hash } = JSON.parse(req.body);
   if (event === 'payment.paid') {
     await db.orders.markPaid({ orderId: order_id, txHash: tx_hash });
-    await fulfillment.ship(order_id);  // ship the shoes 👟
+    await fulfillment.ship(order_id);
   }
   res.sendStatus(200);
 });`,
@@ -553,12 +586,13 @@ if (payment.status !== 'paid') throw new Error('Not paid yet');`,
             </tr></thead>
             <tbody>
               {[
-                ["400", "Bad request",     "Missing or invalid amount"],
+                ["400", "Bad request",     "Missing or invalid amount / unsupported currency"],
                 ["401", "Unauthorized",    "Missing or wrong X-Api-Key"],
                 ["404", "Not found",       "Payment ID doesn't exist or belongs to another merchant"],
                 ["409", "Conflict",        "Email already registered"],
-                ["503", "Service unavail.","FX rate unavailable and no NGN_FALLBACK_RATE set"],
-                ["500", "Server error",    "Something unexpected - check backend logs"],
+                ["429", "Rate limited",    "Too many requests — back off and retry after 1 hour"],
+                ["503", "Service unavail.","FX rate fetch failed and no fallback rate is configured"],
+                ["500", "Server error",    "Something unexpected — check backend logs"],
               ].map(([s, m, c]) => (
                 <tr key={s as string} className="border border-gray-200">
                   <td className="px-3 py-1.5 font-mono text-[#6c47ff]">{s}</td>
