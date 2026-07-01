@@ -13,4 +13,19 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },
+  // Arcscan runs Blockscout, which exposes an Etherscan-compatible verify API.
+  // Blockscout ignores the API key, so any non-empty string works.
+  etherscan: {
+    apiKey: { arcTestnet: "arcscan" },
+    customChains: [
+      {
+        network: "arcTestnet",
+        chainId: 5042002,
+        urls: {
+          apiURL: "https://testnet.arcscan.app/api",
+          browserURL: "https://testnet.arcscan.app",
+        },
+      },
+    ],
+  },
 };

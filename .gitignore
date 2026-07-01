@@ -68,3 +68,4 @@ backend/public/
 .nyc_output/
 *.tgz
 *.tar.gz
+arcpay-standard-input.json
