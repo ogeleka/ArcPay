@@ -69,3 +69,6 @@ backend/public/
 *.tgz
 *.tar.gz
 arcpay-standard-input.json
+
+# hackathon submission package — local only, pasted into the form
+submission/

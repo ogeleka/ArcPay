@@ -2,7 +2,7 @@
 
 **USDC payment gateway built natively on Arc.**
 
-Sub-second settlement. Non-custodial. Price in Naira, Cedis, Shillings or Rand — settle in stable dollars. Two API calls to integrate.
+Sub-second settlement. Non-custodial. Price in Dirham, Naira, Cedis, Shillings or Rand — settle in stable dollars. Two API calls to integrate.
 
 ---
 
@@ -197,12 +197,48 @@ Fee: **0.5%** (50 bps), fixed at deploy time.
 
 | Country | Currency | Symbol |
 |---|---|---|
+| UAE | AED | AED |
 | Nigeria | NGN | ₦ |
 | Ghana | GHS | ₵ |
 | Kenya | KES | KSh |
 | South Africa | ZAR | R |
 
 Rates are fetched live every 60 seconds and locked at payment-creation time.
+
+---
+
+## Built on Arc + Circle
+
+ArcPay settles every payment in **USDC on Arc**. On Arc, USDC is also the native
+gas token, so neither the merchant nor the customer needs a separate gas asset,
+which is the key to onboarding non-crypto users in emerging markets. Arc's
+deterministic, sub-second finality lets the checkout confirm a payment almost
+immediately.
+
+**Arc testnet parameters**
+
+| Item | Value |
+|---|---|
+| Chain ID | `5042002` |
+| USDC (native gas + settlement) | `0x3600000000000000000000000000000000000000` (6 decimals) |
+| ArcPay settlement contract | `0xF5f8e51425cA2240c4cBbEb964b0d1f480A7cDef` |
+| Explorer (verified source) | [Arcscan](https://testnet.arcscan.app/address/0xF5f8e51425cA2240c4cBbEb964b0d1f480A7cDef#code) |
+| Testnet USDC faucet | https://faucet.circle.com |
+
+> Note: when adding Arc to MetaMask via `wallet_addEthereumChain`, set
+> `nativeCurrency.decimals` to `18` (MetaMask rejects other values), even though
+> USDC itself uses 6 decimals for all amounts.
+
+**Circle products used:** USDC (settlement rail + native gas).
+**Roadmap:** CCTP + Bridge Kit (cross-chain USDC pay-in), Circle Wallets
+(embedded-wallet checkout for non-crypto users), Gateway (treasury routing).
+
+Verifying the contract on Arcscan (Blockscout) uses `hardhat-verify` with the
+`customChains` block in [`hardhat.config.js`](hardhat.config.js):
+
+```bash
+npx hardhat verify --network arcTestnet <address> <usdc> <feeRecipient> <feeBps>
+```
 
 ---
 
