@@ -389,11 +389,13 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
 
   const step1Valid = name.trim() && businessType && isEmail(regEmail);
 
-  async function handleSignIn() {
-    if (!siEmail.trim() || !siPass) return;
+  async function handleSignIn(emailArg?: string, passArg?: string) {
+    const email = (emailArg ?? siEmail).trim();
+    const pass  = passArg ?? siPass;
+    if (!email || !pass) return;
     setSiBusy(true); setSiErr(null);
     try {
-      const { token } = await login(siEmail.trim(), siPass);
+      const { token } = await login(email, pass);
       const m = await getMe(token);
       localStorage.setItem("arcpay_token", token);
       onLogin(token, m);
@@ -401,6 +403,10 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
       setSiErr(e instanceof Error ? e.message : "Incorrect email or password");
     } finally { setSiBusy(false); }
   }
+
+  // One-click demo: signs into a ready-made merchant with sample payments,
+  // so reviewers can explore a populated dashboard without registering.
+  function handleDemo() { handleSignIn("demo@arcpay.dev", "demopay123"); }
 
   function goToStep2() {
     setRegErr(null);
@@ -492,7 +498,7 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
                   </button>
                 </div>
               </div>
-              <Button className="w-full" onClick={handleSignIn} disabled={siBusy || !siEmail || !siPass}>
+              <Button className="w-full" onClick={() => handleSignIn()} disabled={siBusy || !siEmail || !siPass}>
                 {siBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : "Sign in"}
               </Button>
 
@@ -514,6 +520,17 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
               </button>
               <p className="text-[11px] text-center text-gray-400 -mt-1">
                 Logs you in if this wallet is linked to an account.
+              </p>
+
+              {/* One-click demo — populated dashboard, no signup */}
+              <button
+                onClick={handleDemo}
+                disabled={siBusy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#6c47ff]/[0.06] border border-[#6c47ff]/30 px-4 py-2.5 text-sm font-semibold text-[#6c47ff] hover:bg-[#6c47ff]/10 transition-colors disabled:opacity-50">
+                <Sparkles className="w-4 h-4" /> Explore the demo dashboard
+              </button>
+              <p className="text-[11px] text-center text-gray-400 -mt-1">
+                A ready-made merchant with sample payments — no signup needed.
               </p>
 
               <p className="text-xs text-center text-gray-400">
