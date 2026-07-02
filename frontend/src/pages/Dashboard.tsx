@@ -271,6 +271,89 @@ function WelcomeWalkthrough({
   );
 }
 
+// Spotlight tour — highlights real dashboard elements and ends by opening the
+// Create Payment flow, so a reviewer is walked from "what am I looking at" to
+// actually making a payment. Targets elements tagged with data-tour="...".
+function SpotlightTour({ onCreate, onClose }: { onCreate: () => void; onClose: () => void }) {
+  const STEPS = [
+    { sel: '[data-tour="balance"]',  title: "Your USDC balance",
+      body: "Every payment settles straight to your own wallet — ArcPay never holds your money. On Arc, USDC is also the gas token, so there's just one asset to manage." },
+    { sel: '[data-tour="payments"]', title: "Live payments feed",
+      body: "Each payment appears here in real time the moment it settles on-chain, with a link to its transaction on Arcscan." },
+    { sel: '[data-tour="create"]',   title: "Now make a payment",
+      body: "This is where it happens. Click below, enter any amount in USDC or a local currency like AED, and you get a checkout link or QR to pay. Let's try it.", final: true },
+  ];
+  const [i, setI] = useState(0);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const step = STEPS[i];
+  const isLast = i === STEPS.length - 1;
+
+  useEffect(() => {
+    const el = document.querySelector(step.sel) as HTMLElement | null;
+    if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+    const measure = () => {
+      const t = document.querySelector(step.sel) as HTMLElement | null;
+      setRect(t ? t.getBoundingClientRect() : null);
+    };
+    measure();
+    const iv = setInterval(measure, 150);
+    const stop = setTimeout(() => clearInterval(iv), 1500);
+    window.addEventListener("scroll", measure, true);
+    window.addEventListener("resize", measure);
+    return () => {
+      clearInterval(iv); clearTimeout(stop);
+      window.removeEventListener("scroll", measure, true);
+      window.removeEventListener("resize", measure);
+    };
+  }, [i, step.sel]);
+
+  const pad = 8, cardW = 328, cardH = 210;
+  let cardTop = window.innerHeight / 2 - cardH / 2;
+  let cardLeft = window.innerWidth / 2 - cardW / 2;
+  if (rect) {
+    const below = rect.bottom + 14;
+    cardTop  = below + cardH < window.innerHeight ? below : Math.max(12, rect.top - cardH - 14);
+    cardLeft = Math.min(Math.max(12, rect.left + rect.width / 2 - cardW / 2), window.innerWidth - cardW - 12);
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
+      {rect ? (
+        <div style={{ position: "fixed", top: rect.top - pad, left: rect.left - pad,
+          width: rect.width + pad * 2, height: rect.height + pad * 2, borderRadius: 14,
+          boxShadow: "0 0 0 9999px rgba(15,15,18,.6), 0 0 0 3px #6c47ff", transition: "all .2s ease" }} />
+      ) : (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,15,18,.6)" }} />
+      )}
+      <div style={{ position: "fixed", top: cardTop, left: cardLeft, width: cardW, pointerEvents: "auto" }}
+        className="bg-white rounded-2xl shadow-2xl p-5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#6c47ff]">Step {i + 1} of {STEPS.length}</span>
+          <button onClick={onClose} className="text-gray-300 hover:text-gray-500" title="Skip"><X className="w-4 h-4" /></button>
+        </div>
+        <h4 className="font-bold text-gray-900 mb-1">{step.title}</h4>
+        <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+        <div className="flex gap-1.5 my-3">
+          {STEPS.map((_, idx) => (
+            <span key={idx} className={`h-1.5 rounded-full transition-all ${idx === i ? "w-5 bg-[#6c47ff]" : idx < i ? "w-1.5 bg-[#6c47ff]/40" : "w-1.5 bg-gray-200"}`} />
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={onClose} className="text-xs font-semibold text-gray-400 hover:text-gray-600">Skip tour</button>
+          <div className="ml-auto flex gap-2">
+            {i > 0 && (
+              <Button variant="outline" className="px-3" onClick={() => setI(n => n - 1)}><ArrowLeft className="w-4 h-4" /></Button>
+            )}
+            <Button onClick={() => (isLast ? onCreate() : setI(n => n + 1))}>
+              {isLast ? <>Create a payment <ArrowRight className="w-4 h-4 ml-1.5" /></> : <>Next <ArrowRight className="w-4 h-4 ml-1.5" /></>}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Auth view
 
 type AuthMode = "signin" | "register";
@@ -470,6 +553,19 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
           {/* sign in */}
           {mode === "signin" && (
             <CardBody className="space-y-4 pt-6">
+              {/* Fast demo — the quickest way in for reviewers, right up top */}
+              <button onClick={handleDemo} disabled={siBusy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#6c47ff] text-white px-4 py-3 text-sm font-bold hover:bg-[#5a39e0] transition-colors disabled:opacity-60 shadow-lg shadow-[#6c47ff]/25">
+                <Sparkles className="w-4 h-4" /> {siBusy ? "Loading demo…" : "Try a fast demo — no signup"}
+              </button>
+              <p className="text-[11px] text-center text-gray-400 -mt-2">
+                Signs you into a ready-made merchant with sample payments and a guided tour.
+              </p>
+              <div className="flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-gray-100" />
+                <span className="text-[10px] uppercase tracking-widest text-gray-300">or sign in</span>
+                <div className="h-px flex-1 bg-gray-100" />
+              </div>
               <div>
                 <h2 className="text-lg font-bold">Welcome back</h2>
                 <p className="text-sm text-gray-400 mt-0.5">Sign in to your merchant dashboard.</p>
@@ -520,17 +616,6 @@ function AuthView({ onLogin }: { onLogin: (token: string, m: MerchantProfile) =>
               </button>
               <p className="text-[11px] text-center text-gray-400 -mt-1">
                 Logs you in if this wallet is linked to an account.
-              </p>
-
-              {/* One-click demo — populated dashboard, no signup */}
-              <button
-                onClick={handleDemo}
-                disabled={siBusy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#6c47ff]/[0.06] border border-[#6c47ff]/30 px-4 py-2.5 text-sm font-semibold text-[#6c47ff] hover:bg-[#6c47ff]/10 transition-colors disabled:opacity-50">
-                <Sparkles className="w-4 h-4" /> Explore the demo dashboard
-              </button>
-              <p className="text-[11px] text-center text-gray-400 -mt-1">
-                A ready-made merchant with sample payments — no signup needed.
               </p>
 
               <p className="text-xs text-center text-gray-400">
@@ -841,10 +926,18 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
     localStorage.setItem(guideKey, "1");
     setShowGuide(false);
   }
-  function openGuide() {
-    setActiveView("home");
-    setShowGuide(true);
-  }
+
+  // Interactive spotlight tour (highlights real elements, ends at Create Payment).
+  // Auto-starts for the demo merchant; the "Setup guide" button opens it too.
+  const isDemo = merchant.email === "demo@arcpay.dev";
+  const [tourOpen, setTourOpen] = useState(false);
+  function openGuide() { setActiveView("home"); setTourOpen(true); }
+  function closeTour() { sessionStorage.setItem("arcpay_tour_seen", "1"); setTourOpen(false); }
+  useEffect(() => {
+    if (isDemo && !sessionStorage.getItem("arcpay_tour_seen")) {
+      setShowGuide(false); setActiveView("home"); setTourOpen(true);
+    }
+  }, [isDemo]);
 
   // Tick every second so "updated X ago" stays current
   const [now, setNow] = useState(() => Date.now());
@@ -1232,7 +1325,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
           <div className="max-w-5xl mx-auto space-y-6">
 
             {/* identity banner - Arc theme */}
-            <div className="arc-panel rounded-2xl px-5 py-4 flex items-center justify-between gap-4 overflow-hidden">
+            <div data-tour="balance" className="arc-panel rounded-2xl px-5 py-4 flex items-center justify-between gap-4 overflow-hidden">
               <div className="min-w-0">
                 <p className="arc-kicker text-[10px] font-medium mb-1">{`{ ${activeView === "home" ? "MERCHANT" : activeView.toUpperCase()} }`}</p>
                 <p className="font-bold text-white truncate text-lg">{merchant.name}</p>
@@ -1356,14 +1449,21 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
               </div>
 
               {/* Live payments feed (B3) */}
-              <Card>
+              <Card data-tour="payments">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold">Recent payments</h3>
                       <span className="text-[10px] font-normal text-[#6c47ff]">● live</span>
                     </div>
-                    <button onClick={() => setActiveView("payments")} className="text-xs text-[#6c47ff] font-semibold hover:underline">View all →</button>
+                    <div className="flex items-center gap-2">
+                      <span data-tour="create">
+                        <Button size="sm" onClick={() => setShowModal(true)}>
+                          <Plus className="w-3.5 h-3.5 mr-1.5" /> New payment
+                        </Button>
+                      </span>
+                      <button onClick={() => setActiveView("payments")} className="text-xs text-[#6c47ff] font-semibold hover:underline">View all →</button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardBody>
@@ -1779,6 +1879,7 @@ window.location = payment_url;`}
       </a>
 
       {showModal && <CreateModal token={token} onClose={() => { setShowModal(false); refresh(); }} />}
+      {tourOpen && <SpotlightTour onCreate={() => { closeTour(); setShowModal(true); }} onClose={closeTour} />}
 
       {showGuide && (
         <WelcomeWalkthrough
