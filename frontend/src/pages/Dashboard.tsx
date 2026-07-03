@@ -274,30 +274,27 @@ function WelcomeWalkthrough({
 // Spotlight tour — highlights real dashboard elements and ends by opening the
 // Create Payment flow, so a reviewer is walked from "what am I looking at" to
 // actually making a payment. Targets elements tagged with data-tour="...".
-function SpotlightTour({ onCreate, onClose }: { onCreate: () => void; onClose: () => void }) {
-  const STEPS = [
-    { sel: '[data-tour="balance"]',  title: "Your USDC balance",
-      body: "Every payment settles straight to your own wallet — ArcPay never holds your money. On Arc, USDC is also the gas token, so there's just one asset to manage." },
-    { sel: '[data-tour="payments"]', title: "Live payments feed",
-      body: "Each payment appears here in real time the moment it settles on-chain, with a link to its transaction on Arcscan." },
-    { sel: '[data-tour="create"]',   title: "Now make a payment",
-      body: "This is where it happens. Click below, enter any amount in USDC or a local currency like AED, and you get a checkout link or QR to pay. Let's try it.", final: true },
-  ];
+type TourStep = { sel: string; title: string; body: string; onEnter?: () => void };
+
+function SpotlightTour({ steps, onCreate, onClose }: { steps: TourStep[]; onCreate: () => void; onClose: () => void }) {
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const step = STEPS[i];
-  const isLast = i === STEPS.length - 1;
+  const step = steps[i];
+  const isLast = i === steps.length - 1;
 
   useEffect(() => {
-    const el = document.querySelector(step.sel) as HTMLElement | null;
-    if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+    step.onEnter?.();               // e.g. switch view / open a settings tab
+    let scrolled = false;
     const measure = () => {
       const t = document.querySelector(step.sel) as HTMLElement | null;
-      setRect(t ? t.getBoundingClientRect() : null);
+      if (t) {
+        if (!scrolled) { try { t.scrollIntoView({ block: "center", behavior: "smooth" }); } catch { /* ignore */ } scrolled = true; }
+        setRect(t.getBoundingClientRect());
+      } else setRect(null);
     };
     measure();
     const iv = setInterval(measure, 150);
-    const stop = setTimeout(() => clearInterval(iv), 1500);
+    const stop = setTimeout(() => clearInterval(iv), 2200);   // allow view/tab transitions to render
     window.addEventListener("scroll", measure, true);
     window.addEventListener("resize", measure);
     return () => {
@@ -305,7 +302,8 @@ function SpotlightTour({ onCreate, onClose }: { onCreate: () => void; onClose: (
       window.removeEventListener("scroll", measure, true);
       window.removeEventListener("resize", measure);
     };
-  }, [i, step.sel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i]);
 
   const pad = 8, cardW = 328, cardH = 210;
   let cardTop = window.innerHeight / 2 - cardH / 2;
@@ -328,13 +326,13 @@ function SpotlightTour({ onCreate, onClose }: { onCreate: () => void; onClose: (
       <div style={{ position: "fixed", top: cardTop, left: cardLeft, width: cardW, pointerEvents: "auto" }}
         className="bg-white rounded-2xl shadow-2xl p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#6c47ff]">Step {i + 1} of {STEPS.length}</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#6c47ff]">Step {i + 1} of {steps.length}</span>
           <button onClick={onClose} className="text-gray-300 hover:text-gray-500" title="Skip"><X className="w-4 h-4" /></button>
         </div>
         <h4 className="font-bold text-gray-900 mb-1">{step.title}</h4>
         <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
         <div className="flex gap-1.5 my-3">
-          {STEPS.map((_, idx) => (
+          {steps.map((_, idx) => (
             <span key={idx} className={`h-1.5 rounded-full transition-all ${idx === i ? "w-5 bg-[#6c47ff]" : idx < i ? "w-1.5 bg-[#6c47ff]/40" : "w-1.5 bg-gray-200"}`} />
           ))}
         </div>
@@ -938,6 +936,38 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
       setShowGuide(false); setActiveView("home"); setTourOpen(true);
     }
   }, [isDemo]);
+
+  // The full spotlight tour: dashboard essentials, then every Settings section,
+  // ending by opening the Create Payment flow — so a reviewer sees the whole app.
+  const tourSteps: TourStep[] = [
+    { sel: '[data-tour="balance"]',  onEnter: () => setActiveView("home"),
+      title: "Your USDC balance",
+      body: "Every payment settles straight to your own wallet — ArcPay never holds your money. On Arc, USDC is also the gas token, so there's just one asset to manage." },
+    { sel: '[data-tour="payments"]', onEnter: () => setActiveView("home"),
+      title: "Live payments feed",
+      body: "Every payment lands here in real time the moment it settles on-chain, each with a link to its transaction on Arcscan." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("profile"),
+      title: "Settings · Profile",
+      body: "Your business name and the settlement wallet where USDC arrives. Everything below lives under Settings." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("password"),
+      title: "Settings · Password",
+      body: "Change the password you use to sign in to this dashboard." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("apikey"),
+      title: "Settings · API Key",
+      body: "Authenticates your server when it calls the ArcPay API. Keep it server-side and rotate it anytime." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("webhook"),
+      title: "Settings · Webhook",
+      body: "ArcPay POSTs a signed event to your server the moment a payment settles. Add your URL and send a test." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("currency"),
+      title: "Settings · Currency & markup",
+      body: "Choose your pricing currency (AED, NGN, GHS, KES, ZAR) and an optional FX markup on conversions." },
+    { sel: '[data-tour="settings-card"]', onEnter: () => openSetting("snippet"),
+      title: "Settings · Integration snippet",
+      body: "Copy-paste code to create a payment from your own app or store — the fastest way to integrate ArcPay." },
+    { sel: '[data-tour="create"]',   onEnter: () => setActiveView("home"),
+      title: "Now make a payment",
+      body: "You've seen the whole app. Click below, enter any amount in USDC or a local currency, and you'll get a checkout link or QR to pay." },
+  ];
 
   // Tick every second so "updated X ago" stays current
   const [now, setNow] = useState(() => Date.now());
@@ -1627,7 +1657,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* Profile */}
               {settingsTab === "profile" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><div className="flex items-center gap-2"><User className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Profile</h3></div></CardHeader>
                   <CardBody className="space-y-4">
                     <div>
@@ -1674,7 +1704,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* Password */}
               {settingsTab === "password" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Change password</h3></div></CardHeader>
                   <CardBody className="space-y-4">
                     <div>
@@ -1715,7 +1745,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* API Key */}
               {settingsTab === "apikey" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><div className="flex items-center gap-2"><Key className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">API Key</h3></div></CardHeader>
                   <CardBody className="space-y-3">
                     {newKey ? (
@@ -1763,7 +1793,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* Webhook */}
               {settingsTab === "webhook" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><div className="flex items-center gap-2"><Webhook className="w-4 h-4 text-gray-400" /><h3 className="font-semibold text-sm">Webhook</h3></div></CardHeader>
                   <CardBody className="space-y-4">
                     <div>
@@ -1806,7 +1836,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* Currency & Markup */}
               {settingsTab === "currency" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><div className="flex items-center gap-2"><span className="text-gray-400 text-sm font-bold">%</span><h3 className="font-semibold text-sm">Currency &amp; FX markup</h3></div></CardHeader>
                   <CardBody className="space-y-4">
                     <div>
@@ -1848,7 +1878,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
 
               {/* Integration snippet */}
               {settingsTab === "snippet" && (
-                <Card>
+                <Card data-tour="settings-card">
                   <CardHeader><h3 className="font-semibold text-sm">Integration snippet</h3></CardHeader>
                   <CardBody>
                     <pre className="bg-[#1e1e2e] text-[#cdd6f4] rounded-xl p-4 text-xs font-mono leading-relaxed overflow-x-auto">
@@ -1879,7 +1909,7 @@ window.location = payment_url;`}
       </a>
 
       {showModal && <CreateModal token={token} onClose={() => { setShowModal(false); refresh(); }} />}
-      {tourOpen && <SpotlightTour onCreate={() => { closeTour(); setShowModal(true); }} onClose={closeTour} />}
+      {tourOpen && <SpotlightTour steps={tourSteps} onCreate={() => { closeTour(); setShowModal(true); }} onClose={closeTour} />}
 
       {showGuide && (
         <WelcomeWalkthrough
