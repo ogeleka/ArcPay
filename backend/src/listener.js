@@ -5,20 +5,21 @@ const { deliver } = require("./webhook");
 
 const ABI = [
   "event PaymentPaid(bytes32 indexed paymentId, address indexed payer, uint256 amount, uint256 fee)",
-  "event PaymentReleased(bytes32 indexed paymentId, address indexed merchant, uint256 amount)",
   "event PaymentRefunded(bytes32 indexed paymentId, address indexed payer, uint256 amount)",
 ];
 
 const CONTRACT_ABI = [
   ...ABI,
-  "function payments(bytes32) view returns (address payer, address merchant, uint256 amount, uint8 status)",
+  // Full Payment struct as declared in ArcPay.sol (7 fields) — must match exactly
+  // so ethers decodes `status` from the right slot.
+  "function payments(bytes32) view returns (address payer, address merchant, uint256 amount, uint256 netPaid, uint256 feeBpsSnapshot, uint64 deadline, uint8 status)",
 ];
 
-const ON_CHAIN_STATUS = { 1: "PaymentPaid", 2: "PaymentReleased", 3: "PaymentRefunded" };
+// On-chain Status enum in ArcPay.sol: 0 = Pending, 1 = Settled, 2 = Refunded.
+const ON_CHAIN_STATUS = { 1: "PaymentPaid", 2: "PaymentRefunded" };
 
 const STATUS = {
   PaymentPaid:     "paid",
-  PaymentReleased: "released",
   PaymentRefunded: "refunded",
 };
 
@@ -51,14 +52,15 @@ function persist(eventType, paymentId, payer, txHash, blockNumber) {
       event:       `payment.${STATUS[eventType]}`,
       payment_id:  paymentId,
       order_id:    p.order_id ?? null,
-      amount_usdc: p.amount,
-      amount_ngn:  p.amount_ngn ?? null,
-      rate:        p.rate ?? null,
-      currency:    p.currency || "USDC",
-      status:      p.status,
-      payer:       p.payer,
-      tx_hash:     txHash,
-      timestamp:   new Date().toISOString(),
+      amount_usdc:  p.amount,
+      amount_local: p.amount_ngn ?? null,   // whole units of the priced currency (AED, NGN, …)
+      amount_ngn:   p.amount_ngn ?? null,   // deprecated alias of amount_local
+      rate:         p.rate ?? null,
+      currency:     p.currency || "USDC",
+      status:       p.status,
+      payer:        p.payer,
+      tx_hash:      txHash,
+      timestamp:    new Date().toISOString(),
     }).catch((err) => console.error("[webhook] delivery error:", err.message));
   }
 }

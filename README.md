@@ -146,14 +146,23 @@ ArcPay POSTs to your `webhook_url` after every on-chain event. Retried 3× on fa
 
 ```json
 {
-  "event": "payment.paid",
-  "payment_id": "0x…",
-  "order_id": "your-order-id",
-  "amount": 5000000,
-  "tx_hash": "0x…",
-  "timestamp": "2026-06-04T14:00:00.000Z"
+  "event":        "payment.paid",
+  "payment_id":   "0x…",
+  "order_id":     "your-order-id",
+  "amount_usdc":  1497678,
+  "amount_local": 55,
+  "rate":         3.67,
+  "currency":     "AED",
+  "status":       "paid",
+  "payer":        "0x…",
+  "tx_hash":      "0x…",
+  "timestamp":    "2026-06-04T14:00:00.000Z"
 }
 ```
+
+`amount_usdc` is in USDC micro-units (6 decimals). `amount_local` is whole units
+of the priced currency (`amount_ngn` is still sent as a deprecated alias). For a
+USDC-priced payment, `amount_local`/`rate` are `null`.
 
 **Verify the signature (Node.js):**
 
@@ -187,7 +196,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 |---|---|---|
 | `createPayment(id, merchant, amount, deadline)` | owner (backend) | Registers an invoice on-chain; snapshots the fee for this payment |
 | `pay(id)` | customer | **Atomic settle** — deducts the fee and forwards the net USDC straight to the merchant in one transaction. No escrow, no separate release step. |
-| `refund(id)` | merchant | Returns the paid amount to the payer |
+| `refund(id)` | merchant | Returns the **net** amount (what the merchant received) to the payer — the protocol fee is not refunded |
 | `setFeeBps(bps)` / `setFeeRecipient(addr)` | owner | Adjust protocol fee / fee wallet |
 | `pause()` / `unpause()` | owner | Circuit breaker |
 

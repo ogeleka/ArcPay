@@ -36,7 +36,7 @@ router.get("/me", requireApiKey, async (req, res, next) => {
 
     const stats = db.prepare(
       `SELECT COUNT(*) AS total,
-              COALESCE(SUM(CASE WHEN status IN ('paid','released') THEN amount ELSE 0 END), 0) AS volume
+              COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS volume
        FROM payments WHERE merchant_id = ?`
     ).get(req.merchantId);
 

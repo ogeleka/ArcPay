@@ -33,7 +33,7 @@ async function registerOnChain(paymentId, merchantWallet, amountUsdc, expiresAt)
 }
 
 const EXPIRY_MS = 15 * 60 * 1000;
-const VALID_STATUSES = new Set(["pending", "paid", "expired", "refunded", "released", "all"]);
+const VALID_STATUSES = new Set(["pending", "paid", "expired", "refunded", "all"]);
 const router = express.Router();
 
 function applyExpiry(row) {
@@ -116,7 +116,7 @@ router.post("/", requireApiKey, async (req, res, next) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       paymentId, req.merchantId, amountUsdc, effectiveCurrency,
-      isFiat ? amountLocal : amountLocal,
+      amountLocal,
       lockedRate, markupBps, midRate,
       order_id ?? null, customer_email ?? null, callback_url ?? null,
       metadata ? JSON.stringify(metadata) : null, expiresAt,
@@ -153,7 +153,7 @@ router.post("/", requireApiKey, async (req, res, next) => {
 
 // GET /payments
 // Query params:
-//   status  = paid|pending|expired|refunded|released|all  (default: all)
+//   status  = paid|pending|expired|refunded|all  (default: all)
 //   page    = 1-based page number  (default: 1)
 //   limit   = rows per page 1-100  (default: 25)
 router.get("/", requireApiKey, (req, res) => {

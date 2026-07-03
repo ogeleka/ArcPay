@@ -2,7 +2,6 @@ const express   = require("express");
 const cors      = require("cors");
 const helmet    = require("helmet");
 const rateLimit = require("express-rate-limit");
-const path      = require("path");
 const { db }    = require("./db");
 const { getRateForCurrency, CURRENCIES } = require("./fx");
 
@@ -38,7 +37,6 @@ app.use("/auth/register", limiter(5,  60));  // 5 registrations per hour
 app.use("/payments",      limiter(120, 1));  // 120 creates/reads per min per IP
 
 app.use(express.json({ limit: "64kb" })); // reject oversized payloads
-app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Public: payment details the checkout page needs (no API key required)
 app.get("/api/pay/:id", (req, res) => {
@@ -75,15 +73,10 @@ app.get("/api/pay/:id", (req, res) => {
   });
 });
 
-// Serve checkout SPA for all /pay/* and /checkout/* routes
-app.get(["/pay/*", "/checkout/*"], (_, res) =>
-  res.sendFile(path.join(__dirname, "..", "public", "checkout.html"))
-);
-
-// Dashboard
-app.get(["/", "/dashboard"], (_, res) =>
-  res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"))
-);;
+// This service is API-only. The dashboard and hosted checkout are the React app
+// (served by nginx in production, Vite in dev), so we don't serve HTML here — a
+// simple JSON root avoids confusing 404s for anyone hitting the API directly.
+app.get("/", (_, res) => res.json({ name: "ArcPay API", status: "ok" }));
 
 // Public: live FX rates for the supported markets (landing page + checkout)
 app.get("/api/rates", async (_req, res) => {
