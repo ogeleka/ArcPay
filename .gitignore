@@ -72,3 +72,6 @@ arcpay-standard-input.json
 
 # hackathon submission package — local only, pasted into the form
 submission/
+
+# committed build-time frontend env (public VITE_ vars) — keep only the .example
+frontend/.env.production

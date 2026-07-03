@@ -23,7 +23,7 @@ No bank. No FX desk. No middleman holds your money.
 
 ```js
 // 1. Create a payment on your server
-const { payment_url } = await fetch('https://api.arcpay.io/payments', {
+const { payment_url } = await fetch('https://arc.ogsnap.online/payments', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -56,19 +56,20 @@ The customer opens a hosted checkout, connects MetaMask, and pays. You receive a
 
 ```
 arcpay/
-├── contracts/          # ArcPay.sol — escrow + instant settlement
+├── contracts/          # ArcPay.sol — atomic on-chain settlement (no escrow)
 ├── backend/            # REST API (merchants, payments, webhooks)
 │   └── src/
 │       ├── routes/     # auth · merchants · payments
 │       ├── middleware/  # auth guard, rate limiter
-│       ├── fx.js        # live FX rates (NGN / GHS / KES / ZAR)
+│       ├── fx.js        # live FX rates (AED / NGN / GHS / KES / ZAR)
 │       ├── listener.js  # on-chain event watcher
 │       └── webhook.js   # signed webhook dispatcher
 ├── frontend/           # React dashboard + hosted checkout
+├── footie/             # Reference merchant integration (demo store, priced in AED)
 ├── ngn/                # FX micro-service (separate process)
 ├── nginx/              # Nginx site config
 ├── scripts/            # deploy, setup, e2e
-└── test/               # Hardhat contract tests (9/9)
+└── test/               # Hardhat contract tests (27 passing)
 ```
 
 ---
@@ -184,12 +185,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 
 | Function | Caller | Description |
 |---|---|---|
-| `createPayment(id, merchant, amount)` | API | Registers payment on-chain |
-| `pay(id)` | customer | Transfers USDC into escrow |
-| `release(id)` | contract | Nets 0.5% fee to protocol, rest to merchant |
-| `refund(id)` | merchant | Returns full amount to payer |
+| `createPayment(id, merchant, amount, deadline)` | owner (backend) | Registers an invoice on-chain; snapshots the fee for this payment |
+| `pay(id)` | customer | **Atomic settle** — deducts the fee and forwards the net USDC straight to the merchant in one transaction. No escrow, no separate release step. |
+| `refund(id)` | merchant | Returns the paid amount to the payer |
+| `setFeeBps(bps)` / `setFeeRecipient(addr)` | owner | Adjust protocol fee / fee wallet |
+| `pause()` / `unpause()` | owner | Circuit breaker |
 
-Fee: **0.5%** (50 bps), fixed at deploy time.
+**Fee:** default **0.5%** (50 bps), owner-adjustable up to a hard-coded **10% ceiling** (`MAX_FEE_BPS`). Each payment **snapshots its fee at creation** (`feeBpsSnapshot`), so a later fee change never reprices in-flight invoices. Built with OpenZeppelin `Ownable`, `ReentrancyGuard`, `Pausable`, and `SafeERC20`.
 
 ---
 
@@ -230,8 +232,15 @@ immediately.
 > USDC itself uses 6 decimals for all amounts.
 
 **Circle products used:** USDC (settlement rail + native gas).
+
+**FX layer:** ArcPay's FX micro-service locks a mid-market rate at payment
+creation so a local-currency price (e.g. AED) can't drift before the customer
+pays — the same multi-currency, FX-aware settlement problem Circle's **StableFX**
+is built to solve. It's a natural next integration to replace our own rate source.
+
 **Roadmap:** CCTP + Bridge Kit (cross-chain USDC pay-in), Circle Wallets
-(embedded-wallet checkout for non-crypto users), Gateway (treasury routing).
+(embedded-wallet checkout for non-crypto users), Gateway (treasury routing),
+StableFX (FX-aware settlement).
 
 Verifying the contract on Arcscan (Blockscout) uses `hardhat-verify` with the
 `customChains` block in [`hardhat.config.js`](hardhat.config.js):
