@@ -72,7 +72,12 @@ function fiat(local, rate, currency) {
       .run(crypto.randomUUID(), merchantId, keyHash);
   }
 
-  // Rebuild sample payments so the dashboard looks alive.
+  // Rebuild sample payments so the dashboard looks alive. Delete child
+  // transactions first — payments have a FK from transactions(payment_id) with
+  // no cascade, so removing payments directly would fail once any exist.
+  db.prepare(
+    "DELETE FROM transactions WHERE payment_id IN (SELECT id FROM payments WHERE merchant_id = ?)"
+  ).run(merchantId);
   db.prepare("DELETE FROM payments WHERE merchant_id = ?").run(merchantId);
   const samples = [
     { ...fiat(55,    3.6725, "AED"),  status: "paid",    d: 0, h: 2, order: "FOOTIE-2043", email: "aisha@example.ae" },
