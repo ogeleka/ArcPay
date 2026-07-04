@@ -19,6 +19,12 @@ No bank. No FX desk. No middleman holds your money.
 
 ---
 
+## Architecture
+
+![ArcPay architecture — merchant prices in local currency, customer pays USDC, the on-chain settlement contract forwards the net straight to the merchant wallet, and a signed webhook confirms it](docs/architecture.png)
+
+---
+
 ## Quick integration
 
 ```js
