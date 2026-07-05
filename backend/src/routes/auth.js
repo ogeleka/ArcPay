@@ -205,6 +205,11 @@ router.post("/change-password", async (req, res, next) => {
       return res.status(401).json({ error: "Session expired - please sign in again" });
     }
 
+    // Don't let anyone change the shared demo account's password.
+    if (require("../middleware/auth").isDemoMerchant(merchantId)) {
+      return res.status(403).json({ error: "This action is disabled on the shared demo account." });
+    }
+
     const { current_password, new_password } = req.body;
     if (!current_password || !new_password)
       return res.status(400).json({ error: "current_password and new_password are required" });

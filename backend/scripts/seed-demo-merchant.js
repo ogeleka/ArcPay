@@ -26,7 +26,13 @@ const DEMO = {
   // Override with DEMO_WALLET if you want a funded address; defaults to the
   // fee recipient (which accrues protocol fees, so it usually holds USDC).
   wallet:   process.env.DEMO_WALLET || "0xD4F3Fa924910411aE6aA91cA65cF5cEaC9897b87",
-  webhook:  "https://demo.arcpay.dev/webhooks/arcpay",
+  // Fixed API key + webhook secret so the demo account can be wired to the demo
+  // store: put these SAME values in the store's .env (ARCPAY_API_KEY /
+  // ARCPAY_WEBHOOK_SECRET) and its payments show up in this dashboard's live feed.
+  // Point the webhook at the store's receiver (override with DEMO_WEBHOOK_URL).
+  apiKey:        process.env.DEMO_API_KEY        || "arcpay_demo_pk_9f8e7d6c5b4a3210f1e2d3c4b5a69780",
+  webhookSecret: process.env.DEMO_WEBHOOK_SECRET || "whsec_demo_1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+  webhook:       process.env.DEMO_WEBHOOK_URL    || "https://arc.ogsnap.online/shop/api/v1/payments/arcpay/webhook",
 };
 
 function ts(daysAgo, hoursAgo = 0) {
@@ -62,15 +68,14 @@ function fiat(local, rate, currency) {
           "AED", "ecommerce", "https://arc.ogsnap.online", "Sell physical goods");
   }
 
-  // Webhook secret + at least one API key
-  db.prepare("UPDATE merchants SET webhook_secret = COALESCE(webhook_secret, ?) WHERE id = ?")
-    .run(crypto.randomBytes(24).toString("hex"), merchantId);
-  if (!db.prepare("SELECT id FROM api_keys WHERE merchant_id = ?").get(merchantId)) {
-    const apiKey  = crypto.randomBytes(32).toString("hex");
-    const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
-    db.prepare("INSERT INTO api_keys (id, merchant_id, key_hash) VALUES (?, ?, ?)")
-      .run(crypto.randomUUID(), merchantId, keyHash);
-  }
+  // Force the fixed webhook secret + API key (idempotent — always the same
+  // values, so the store's .env and this account stay in sync on every re-seed).
+  db.prepare("UPDATE merchants SET webhook_secret = ? WHERE id = ?")
+    .run(DEMO.webhookSecret, merchantId);
+  const keyHash = crypto.createHash("sha256").update(DEMO.apiKey).digest("hex");
+  db.prepare("DELETE FROM api_keys WHERE merchant_id = ?").run(merchantId);
+  db.prepare("INSERT INTO api_keys (id, merchant_id, key_hash) VALUES (?, ?, ?)")
+    .run(crypto.randomUUID(), merchantId, keyHash);
 
   // Rebuild sample payments so the dashboard looks alive. Delete child
   // transactions first — payments have a FK from transactions(payment_id) with
@@ -109,5 +114,12 @@ function fiat(local, rate, currency) {
   console.log(`✅ Demo merchant ready: ${DEMO.email} / ${DEMO.password}`);
   console.log(`   Wallet: ${DEMO.wallet}`);
   console.log(`   Seeded ${samples.length} payments (${paid} paid, ${samples.length - paid} pending).`);
+  console.log("");
+  console.log("   Wire your demo store to this account so its payments appear here.");
+  console.log("   Put these in the store's .env, then restart it:");
+  console.log(`     ARCPAY_API_KEY=${DEMO.apiKey}`);
+  console.log(`     ARCPAY_WEBHOOK_SECRET=${DEMO.webhookSecret}`);
+  console.log(`     ARCPAY_URL=https://arc.ogsnap.online`);
+  console.log(`   Demo webhook_url is set to: ${DEMO.webhook}`);
   process.exit(0);
 })().catch(err => { console.error("Seed failed:", err); process.exit(1); });

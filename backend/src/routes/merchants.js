@@ -2,7 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const { ethers } = require("ethers");
 const { db } = require("../db");
-const { requireApiKey } = require("../middleware/auth");
+const { requireApiKey, blockDemo } = require("../middleware/auth");
 
 const USDC_ABI = ["function balanceOf(address) view returns (uint256)"];
 
@@ -97,7 +97,7 @@ router.post("/me/webhook-test", requireApiKey, async (req, res, next) => {
 });
 
 // POST /merchants/me/rotate-key - invalidate old API key, issue a new one
-router.post("/me/rotate-key", requireApiKey, (req, res, next) => {
+router.post("/me/rotate-key", requireApiKey, blockDemo, (req, res, next) => {
   try {
     // Delete all existing keys for this merchant
     db.prepare("DELETE FROM api_keys WHERE merchant_id = ?").run(req.merchantId);
@@ -112,7 +112,7 @@ router.post("/me/rotate-key", requireApiKey, (req, res, next) => {
 });
 
 // PATCH /merchants/me - update profile fields, webhook, markup, currency
-router.patch("/me", requireApiKey, (req, res, next) => {
+router.patch("/me", requireApiKey, blockDemo, (req, res, next) => {
   try {
     const { name, email, wallet_address, webhook_url, markup_bps, default_currency } = req.body;
 

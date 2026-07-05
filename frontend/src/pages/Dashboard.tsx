@@ -1638,6 +1638,13 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
             {/* settings */}
             <div className={activeView === "settings" ? "space-y-5 max-w-xl" : "hidden"}>
 
+              {isDemo && (
+                <div className="flex gap-2 items-start rounded-xl bg-amber-50 border border-amber-100 px-3 py-2.5 text-sm text-amber-800">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>This is the shared demo account. Editing the profile, password, API key and webhook is disabled here so everyone gets a clean demo — everything is fully viewable.</span>
+                </div>
+              )}
+
               {/* Header - chosen from the sidebar dropdown */}
               <div>
                 <h2 className="text-lg font-bold text-gray-900">{settingsLabel}</h2>
@@ -1695,7 +1702,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     {profileMsg && (
                       <p className={`text-xs ${profileMsg.includes("✓") ? "text-green-700" : "text-red-600"}`}>{profileMsg}</p>
                     )}
-                    <Button className="w-full" onClick={saveProfile} disabled={profileSaving}>
+                    <Button className="w-full" onClick={saveProfile} disabled={profileSaving || isDemo}>
                       {profileSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Save changes"}
                     </Button>
                   </CardBody>
@@ -1736,7 +1743,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                     {passMsg && (
                       <p className={`text-xs ${passMsg.includes("✓") ? "text-green-700" : "text-red-600"}`}>{passMsg}</p>
                     )}
-                    <Button className="w-full" onClick={savePassword} disabled={passSaving}>
+                    <Button className="w-full" onClick={savePassword} disabled={passSaving || isDemo}>
                       {passSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</> : "Change password"}
                     </Button>
                   </CardBody>
@@ -1781,7 +1788,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                         )}
                         {rotateErr && <p className="text-xs text-red-600">{rotateErr}</p>}
                         {!confirmRotate && (
-                          <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={handleRotate} disabled={rotating}>
+                          <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={handleRotate} disabled={rotating || isDemo}>
                             {rotating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Rotate key to reveal a new one
                           </Button>
                         )}
@@ -1823,7 +1830,7 @@ function DashboardView({ token, merchant: initialMerchant, onLogout }: {
                       <p className={`text-xs ${webhookMsg.includes("fail") || webhookMsg.includes("error") ? "text-red-600" : "text-green-700"}`}>{webhookMsg}</p>
                     )}
                     <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1" onClick={saveWebhook} disabled={webhookSaving}>
+                      <Button variant="outline" className="flex-1" onClick={saveWebhook} disabled={webhookSaving || isDemo}>
                         {webhookSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save URL"}
                       </Button>
                       <Button className="flex-1" onClick={sendTestWebhook} disabled={testingHook || !webhookUrl}>

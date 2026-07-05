@@ -31,4 +31,20 @@ function requireApiKey(req, res, next) {
   return res.status(401).json({ error: "Authentication required - provide Authorization: Bearer <token> or X-Api-Key header" });
 }
 
-module.exports = { requireApiKey };
+// The shared demo account is open to anyone, so its destructive actions
+// (rotate key, change password, edit profile/webhook) are blocked — otherwise
+// one reviewer could rotate the key or change the password and break the demo
+// for everyone else. Read-only exploration stays fully available.
+const DEMO_EMAIL = "demo@arcpay.dev";
+function isDemoMerchant(merchantId) {
+  const m = db.prepare("SELECT email FROM merchants WHERE id = ?").get(merchantId);
+  return !!m && m.email === DEMO_EMAIL;
+}
+function blockDemo(req, res, next) {
+  if (isDemoMerchant(req.merchantId)) {
+    return res.status(403).json({ error: "This action is disabled on the shared demo account." });
+  }
+  next();
+}
+
+module.exports = { requireApiKey, blockDemo, isDemoMerchant, DEMO_EMAIL };
