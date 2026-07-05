@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, Zap, Shield, DollarSign, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { STORE_URL } from "@/lib/utils";
 
 // Animated checkout demo
 
@@ -412,7 +413,7 @@ export default function Landing() {
               className="rounded-xl bg-[#c7c2f7] text-[#0a1734] font-semibold px-6 h-12 inline-flex items-center hover:bg-white transition-colors">
               Start accepting USDC
             </Link>
-            <a href={import.meta.env.VITE_STORE_URL ?? "http://localhost:3100"}
+            <a href={STORE_URL}
               target="_blank" rel="noreferrer"
               className="rounded-xl border border-white/30 text-white font-semibold px-6 h-12 inline-flex items-center hover:bg-white/10 transition-colors">
               See Footie Dubai demo ↗
@@ -474,7 +475,7 @@ export default function Landing() {
             </div>
             <nav className="flex flex-wrap items-center gap-6 text-sm text-gray-400">
               <Link to="/docs"      className="hover:text-gray-900 transition-colors">Docs</Link>
-              <a href={import.meta.env.VITE_STORE_URL ?? "http://localhost:3100"} target="_blank" rel="noreferrer" className="hover:text-gray-900 transition-colors">Demo store ↗</a>
+              <a href={STORE_URL} target="_blank" rel="noreferrer" className="hover:text-gray-900 transition-colors">Demo store ↗</a>
               <Link to="/dashboard" className="hover:text-gray-900 transition-colors">Dashboard</Link>
               <a href="https://arc.network" target="_blank" rel="noreferrer"
                 className="hover:text-gray-900 transition-colors">Arc ↗</a>

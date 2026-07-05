@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+import { resolveApiBase } from "./utils";
+
+const BASE = resolveApiBase();
 
 // Types
 

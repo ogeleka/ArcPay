@@ -38,3 +38,29 @@ export function secondsUntil(iso: string | null): number {
 export function truncAddr(addr: string, chars = 4): string {
   return `${addr.slice(0, chars + 2)}...${addr.slice(-chars)}`;
 }
+
+// ── URL resolution ──────────────────────────────────────────────────────────
+// Vite loads .env.local ABOVE .env.production, so a local `npm run build` can
+// bake localhost URLs into a production bundle. These resolvers guard against
+// that: on a real (non-localhost) origin we never point at localhost — we derive
+// from window.location.origin instead.
+const isLocalHostname = (h: string) => /^(localhost|127\.|0\.0\.0\.0|\[?::1)/.test(h);
+const isLocalUrl = (u: string | undefined) => !!u && /(?:\/\/)(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[?::1)/.test(u);
+
+/** Base URL of the ArcPay API. */
+export function resolveApiBase(): string {
+  const env = import.meta.env.VITE_API_URL as string | undefined;
+  if (env && !isLocalUrl(env)) return env;
+  if (typeof window !== "undefined" && !isLocalHostname(window.location.hostname)) return window.location.origin;
+  return env ?? "http://localhost:3001";
+}
+
+/** URL of the Footie Dubai demo store (served at /try/ in production). */
+export function resolveStoreUrl(): string {
+  const env = import.meta.env.VITE_STORE_URL as string | undefined;
+  if (env && !isLocalUrl(env)) return env;
+  if (typeof window !== "undefined" && !isLocalHostname(window.location.hostname)) return `${window.location.origin}/try/`;
+  return env ?? "http://localhost:3100";
+}
+
+export const STORE_URL = resolveStoreUrl();

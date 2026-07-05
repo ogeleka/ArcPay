@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ChevronDown, ChevronUp, ExternalLink, Copy, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const STORE_URL = import.meta.env.VITE_STORE_URL ?? "http://localhost:3100";
+import { STORE_URL } from "@/lib/utils";
 
 // Arc testnet params (for MetaMask add-chain)
 const ARC_TESTNET = {
