@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const crypto  = require("crypto");
+const fs      = require("fs");
+const path    = require("path");
 
 const app = express();
 const PORT        = process.env.PORT        || 3100;
@@ -76,8 +78,19 @@ const PRODUCTS = [
   { id: "downtown-hitop", name: "Downtown Hi-Top", price: 22, emoji: "👢", desc: "Statement fit for the skyline." },
 ];
 
-// just hold orders in memory. it's a demo, restart and they're gone, no big deal
-const orders = new Map();
+// Orders persist to a small JSON file so a restart (or a webhook that arrives
+// for an order created in an earlier run) doesn't lose them. It's a demo, not a
+// database, but losing orders on every restart made confirmations flaky.
+const ORDERS_FILE = path.join(__dirname, "orders.json");
+function loadOrders() {
+  try { return new Map(Object.entries(JSON.parse(fs.readFileSync(ORDERS_FILE, "utf8")))); }
+  catch { return new Map(); }
+}
+function saveOrders() {
+  try { fs.writeFileSync(ORDERS_FILE, JSON.stringify(Object.fromEntries(orders))); }
+  catch (e) { console.error("[footie] could not save orders:", e.message); }
+}
+const orders = loadOrders();
 
 // the webhook needs the raw body for the signature check, so register it before json()
 app.use(`${BASE}/arcpay/webhook`, express.raw({ type: "application/json" }));
@@ -658,6 +671,7 @@ app.post(`${BASE}/buy`, async (req, res) => {
     usd,
     created_at: new Date().toISOString(),
   });
+  saveOrders();
 
   console.log(`[footie] order ${orderId} → payment ${paymentData.payment_id}`);
   if (wantsJson) return res.json({ payment_url: paymentData.payment_url, order_id: orderId });
@@ -768,6 +782,7 @@ app.post(`${BASE}/arcpay/webhook`, (req, res) => {
       order.tx_hash = payload.tx_hash || null;
       order.payer   = payload.payer || null;
       order.paid_at = new Date().toISOString();
+      saveOrders();
       console.log(`[footie] order ${payload.order_id} → PAID ✓`);
     } else {
       console.warn(`[footie] no in-memory order for ${payload.order_id} (may be test event)`);

@@ -75,3 +75,6 @@ submission/
 
 # committed build-time frontend env (public VITE_ vars) — keep only the .example
 frontend/.env.production
+
+# footie demo order store (runtime state)
+footie/orders.json
