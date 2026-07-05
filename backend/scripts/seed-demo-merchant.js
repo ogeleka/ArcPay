@@ -32,7 +32,7 @@ const DEMO = {
   // Point the webhook at the store's receiver (override with DEMO_WEBHOOK_URL).
   apiKey:        process.env.DEMO_API_KEY        || "arcpay_demo_pk_9f8e7d6c5b4a3210f1e2d3c4b5a69780",
   webhookSecret: process.env.DEMO_WEBHOOK_SECRET || "whsec_demo_1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
-  webhook:       process.env.DEMO_WEBHOOK_URL    || "https://arc.ogsnap.online/shop/api/v1/payments/arcpay/webhook",
+  webhook:       process.env.DEMO_WEBHOOK_URL    || "https://arc.ogsnap.online/try/arcpay/webhook",
 };
 
 function ts(daysAgo, hoursAgo = 0) {
