@@ -344,10 +344,10 @@ export default function Landing() {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">How it works</h2>
           <div className="grid sm:grid-cols-4 gap-6 relative">
             {[
-              { n: "1", title: "Sign up",   body: "Call POST /merchants. Get your API key and webhook secret." },
-              { n: "2", title: "Create",    body: "Your server calls POST /payments with the amount in USDC or NGN." },
-              { n: "3", title: "Customer pays", body: "They open the hosted checkout, connect wallet, and pay in one tap." },
-              { n: "4", title: "Webhook + ship", body: "ArcPay fires a signed webhook. Verify it and fulfil the order." },
+              { n: "1", title: "Sign up",          body: "Register in the dashboard for your API key and webhook secret. No approval, no waiting." },
+              { n: "2", title: "Create a payment", body: "Your server calls POST /payments with the amount in USDC or a local currency. You get a hosted checkout link back." },
+              { n: "3", title: "Customer pays",    body: "They open the checkout, connect a wallet, and pay USDC in one tap. It settles straight to your wallet." },
+              { n: "4", title: "Confirm & ship",   body: "ArcPay sends a signed webhook the moment it settles. Verify the signature and fulfil the order." },
             ].map(({ n, title, body }) => (
               <div key={n} className="relative text-center">
                 <div className="w-10 h-10 rounded-full bg-[#6c47ff] text-white font-bold text-sm flex items-center justify-center mx-auto mb-3">
