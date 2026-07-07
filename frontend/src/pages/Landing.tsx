@@ -182,15 +182,20 @@ export default function Landing() {
           <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Left */}
             <div className="flex-1 text-center lg:text-left">
-              <p className="arc-kicker text-xs sm:text-sm font-medium mb-6">{"{ USDC PAYMENTS ON ARC }"}</p>
+              <p className="arc-kicker text-xs sm:text-sm font-medium mb-6">{"USDC PAYMENT RAIL · ON ARC"}</p>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white leading-[0.98] mb-6">
-                Dollar-stable payments<br />
-                for Africa, the Gulf and beyond.
+                USDC payments that settle<br />
+                straight to the merchant.
               </h1>
-              <p className="text-lg sm:text-xl text-blue-100/80 leading-relaxed mb-9 max-w-lg mx-auto lg:mx-0">
-                Settlement in under a second. No FX risk. No gateway holding your money.
-                Accept USDC natively - in naira, cedis, shillings, rand, dirhams, or straight dollars.
-                Your currency, your choice.
+              <p className="text-lg sm:text-xl text-blue-100/80 leading-relaxed mb-4 max-w-lg mx-auto lg:mx-0">
+                ArcPay is a non-custodial payment gateway on Arc. Price a checkout in
+                naira, cedis, shillings, rand, dirhams, or dollars, and the customer pays
+                USDC that settles directly to your wallet in a single on-chain
+                transaction. The rate is locked at checkout, so the price can't drift.
+                We never hold the funds.
+              </p>
+              <p className="text-sm text-blue-100/50 mb-9 max-w-lg mx-auto lg:mx-0">
+                Dollar-stable payments for Africa, the Gulf and beyond.
               </p>
               {/* phone mockup - shown here on mobile, in the right column on desktop */}
               <div className="lg:hidden flex justify-center mb-9">
@@ -230,14 +235,14 @@ export default function Landing() {
       <div className="border-y border-gray-100 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600">
           {[
-            ["⚡", "< 1s finality"],
-            ["💵", "0.5% flat fee"],
-            ["🔒", "Non-custodial"],
-            ["🌍", "5 local currencies"],
-            ["🛡️", "Signed webhooks"],
-          ].map(([icon, text]) => (
-            <span key={text} className="flex items-center gap-1.5">
-              <span>{icon}</span>
+            "Deterministic finality on Arc",
+            "0.5% flat fee, locked per invoice",
+            "Non-custodial: contract to wallet",
+            "5 local currencies + USD",
+            "HMAC-signed webhooks",
+          ].map(text => (
+            <span key={text} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6c47ff]/60 shrink-0" />
               <span className="font-medium">{text}</span>
             </span>
           ))}
@@ -264,7 +269,7 @@ export default function Landing() {
             {
               icon: Zap,
               title: "Sub-second finality",
-              body: "Payments confirm before the customer closes the tab. Stripe's 2-7 day settlement looks archaic next to this. That speed is structural, not a feature flag.",
+              body: "Payments reach final settlement before the customer closes the tab. You can fulfil the order the instant it clears, instead of waiting days for a bank to confirm. The speed is structural, not a setting.",
             },
             {
               icon: Shield,

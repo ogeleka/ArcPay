@@ -78,3 +78,8 @@ frontend/.env.production
 
 # footie demo order store (runtime state)
 footie/orders.json
+
+# internal operations runbook — local only (has infra/creds)
+RUNBOOK.md
+RUNBOOK.pdf
+RUNBOOK.html
